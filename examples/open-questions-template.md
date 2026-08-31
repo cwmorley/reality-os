@@ -20,19 +20,36 @@ _None._
 
 - [ ] **Q-2026-08-30-01 — Will the counterparty confirm the renewal terms?**
   - Question: Does the vendor confirm the quoted renewal rate, and does
-      that response change scope, timeline, or budget?
-        - Why now: This is the central unresolved external fact; no internal
-            planning can substitute for it.
-              - Blocks: Signing, declining, or renegotiating the renewal.
-                - Waiting on: Vendor's promised response by Friday. If no response
-                    arrives, send one follow-up the following Monday.
-                      - Answer / evidence:
-                        - Apply to: `Opportunities/Project Alpha.md`
-                          - Source candidate: CLAUDE-20260830T051545-A1F2
-                          ```
+    that response change scope, timeline, or budget?
+  - Why now: This is the central unresolved external fact; no internal
+    planning can substitute for it.
+  - Blocks: Signing, declining, or renegotiating the renewal.
+  - Waiting on: Vendor's promised response by Friday. If no response
+    arrives, send one follow-up the following Monday.
+  - Answer / evidence:
+  - Apply to: `Opportunities/Project Alpha.md`
+  - Source candidate: CLAUDE-20260830T051545-A1F2
 
-                          ## The two rules that make this queue trustworthy
+## Later
 
-                          **A question placed under Later must name the event that brings it back**, not just "revisit sometime." Vague resurfacing triggers are how a queue silently fills with dead weight that nobody actively decided to drop — it just never had a reason to come back up.
+### Project Alpha
 
-                          **A question only leaves the queue after its answer is durably recorded somewhere else** — the `Apply to:` target — not when it's merely marked done. Deleting a resolved question without confirming its answer landed in the owning canonical note is the single easiest way to lose a decision that took real effort to reach.
+- [ ] **Q-2026-08-30-02 — Does the renewal justify the added scope?**
+  - Depends on: Q-2026-08-30-01
+  - Why later: No confirmed terms exist yet; evaluating imagined terms
+    would be speculative.
+  - Trigger: Move to Answer now once the vendor sends confirmed terms.
+  - Blocks: Committing to the added scope.
+  - Answer / evidence:
+  - Apply to: `Opportunities/Project Alpha.md`
+
+## Answered — awaiting processing
+
+_None._
+```
+
+## The two rules that make this queue trustworthy
+
+**A question placed under Later must name the event that brings it back**, not just "revisit sometime." Vague resurfacing triggers are how a queue silently fills with dead weight that nobody actively decided to drop — it just never had a reason to come back up.
+
+**A question only leaves the queue after its answer is durably recorded somewhere else** — the `Apply to:` target — not when it's merely marked done. Deleting a resolved question without confirming its answer landed in the owning canonical note is the single easiest way to lose a decision that took real effort to reach.
