@@ -1,12 +1,14 @@
 # Write lock contract (example)
 
-Genericized from the working contract. This governs *how* the write-lock state file (`write-lock-state.md`) gets used — it is a cooperative collision and stale-context guard for AI sessions, not technical enforcement. The vault owner remains responsible for avoiding simultaneous canonical write-heavy sessions when practical.
+This contract governs how cooperating AI sessions use `write-lock-state.md`. The lock is a cooperative collision control, not technical enforcement. It carries no approval, scope, ownership, or truth authority.
 
 ```markdown
-The write lock is a cooperative collision and stale-context guard for AI
-sessions. It is not technical enforcement. The vault owner remains
-responsible for avoiding simultaneous canonical write-heavy sessions when
-practical.
+# Write Lock Contract
+
+The write lock is a cooperative control that reduces collision risk among
+cooperating AI sessions. It is not a filesystem mutex, atomic compare-and-swap,
+or hostile-writer boundary. Human Authority remains responsible for avoiding
+simultaneous canonical write-heavy sessions when practical.
 
 ## When it applies
 
@@ -15,73 +17,79 @@ decision, dashboard, governance, or other durable shared state. It also
 applies to the canonical human-facing question queue and formal
 reconciliation writeback.
 
-The lock is not required for read-only work or for writes confined to an
-agent's existing provisional/exclusive domain, unless that session will also
-change canonical state.
+The lock is not required for read-only work or writes confined to a
+Provisional Contributor's owned outbox or exclusive working domain, unless
+that session will also change canonical state.
 
 ## What it never changes
 
 - Holding the lock grants no approval, authority, scope, truth status, or
   permission to write.
-  - Existing ownership boundaries remain in force. One agent may not edit
-    another agent's owned files just because it holds the lock.
-    - The lock itself cannot authorize canonical implementation.
-    - Current canonical state and direct evidence outrank working notes,
-      handoffs, reports, and outboxes.
+- Existing ownership boundaries remain in force.
+- One participant may not edit another participant's owned files merely
+  because it holds the lock.
+- Current canonical state and direct evidence outrank working notes,
+  handoffs, reports, and outboxes.
 
-      ## Acquire
+## Acquire
 
-      1. Read the lock state file immediately before a consequential canonical
-         write session.
-         2. If `status` is `locked` and `expires_at` is still in the future, do not
-            overwrite it. Stop before canonical changes and report the owner, task,
-               targets, and expiry.
-               3. If the lock is malformed or expiry cannot be determined, fail closed and
-                  ask the vault owner to inspect it.
-                  4. If unlocked or expired, replace the operational fields with `status:
-                     locked`, the writing agent's name as `owner`, a collision-resistant
-                        `session` token, a one-line `task`, `locked_at` (ISO 8601 with offset),
-                           `expires_at` (60 minutes after acquisition), and the exact intended
-                              target paths.
-                              5. Reread the lock and proceed only if `status`, `owner`, and `session`
-                                 still match. Recheck ownership immediately before every canonical file
-                                    write. Add newly discovered exact targets to the lock before editing
-                                       them.
+1. Read the lock state immediately before a consequential canonical write
+   session.
+2. If `status` is `locked` and `expires_at` is in the future, make no
+   canonical change. Report the owner, task, targets, and expiry.
+3. If the lock is malformed or expiry cannot be determined, fail closed and
+   ask Human Authority to inspect it.
+4. If the lock is unlocked or expired, replace its operational fields with:
+   - `status: locked`;
+   - the writing role or agent as `owner`;
+   - a collision-resistant `session` token;
+   - a one-line `task`;
+   - `locked_at` in ISO 8601 with offset;
+   - `expires_at` 60 minutes after acquisition; and
+   - the exact intended target paths.
+5. Reread the lock and proceed only if `status`, `owner`, and `session` still
+   match. Recheck ownership immediately before every canonical file write.
+   Add newly discovered exact targets to the lock before editing them.
 
-                                       An expired lock may be replaced, but the new owner must report that it
-                                       recovered an expired lock. Long sessions must renew their own expiry before
-                                       it passes.
+An expired lock may be replaced, but the new owner reports that it recovered
+an expired lock. Long sessions renew their own expiry before it passes.
 
-                                       ## Freshness and writing
+## Freshness and writing
 
-                                       After acquiring the lock, reread each live target immediately before editing
-                                       it. If it changed since the plan or evidence review was formed, reconcile
-                                       the difference and replan; do not overwrite from stale context. For
-                                       consequential replacements or multi-file reconciliation, compare a last-read
-                                       hash when the tool surface supports it.
+After acquiring the lock, reread each live target immediately before editing
+it. If a target changed after the plan or evidence review was formed,
+reconcile the difference and replan; do not overwrite from stale context.
 
-                                       Apply only changes already authorized by the vault owner or an existing
-                                       explicit governance rule. Verify the intended result and report the exact
-                                       changed-file ledger.
+For consequential replacements or multi-file reconciliation, compare a
+last-read hash when the tool surface supports it. This is an additional
+freshness check, not proof that the lock is technically exclusive.
 
-                                       ## Release and recovery
+Apply only changes authorized by Human Authority or an explicit governing
+rule. Verify the intended result and report the exact changed-file ledger.
 
-                                       After verification, reread the lock. Only the matching `owner` and
-                                       `session` may release it. Restore `status: unlocked`, set scalar
-                                       operational fields to null, and restore an empty target list.
+## Release and recovery
 
-                                       On failure or interruption, make a best-effort release if ownership still
-                                       matches and report any unreleased lock. Never unlock another active
-                                       session. The vault owner may manually clear an abandoned or malformed lock
-                                       after confirming no writer is still active.
+After verification, reread the lock. Only the matching `owner` and `session`
+may release it. Restore `status: unlocked`, set scalar operational fields to
+null, and restore an empty target list.
 
-                                       ## Reassessment trigger
+On failure or interruption, make a best-effort release if ownership still
+matches and report any unreleased lock. Never unlock another active session.
+Human Authority may manually clear an abandoned or malformed lock after
+confirming that no writer remains active.
 
-                                       This cooperative design is the default. Reconsider technical enforcement
-                                       only after two material collision or overwrite failures occur despite
-                                       correct lock use, or one failure causes serious irreversible harm.
-                                       ```
+## Reassessment trigger
 
-                                       ## The distinction worth keeping
+Keep the cooperative design unless two material collision or overwrite
+failures occur despite correct lock use, or one failure causes serious
+irreversible harm. Those events justify reassessing stronger technical
+locking; architectural neatness alone does not.
+```
 
-                                       A lock stops two sessions from writing to the same file *at the same time*. It does nothing about a session that formed its plan five minutes ago, before the file changed underneath it, and is now about to commit stale reasoning under a perfectly valid lock. That's why "freshness and writing" is its own numbered section rather than folded into "acquire" — concurrency and staleness are different failure modes with different fixes, and conflating them is an easy design mistake to make.
+## Concurrency and freshness are different
+
+**Concurrency failure:** two writers collide. Single-writer ownership and the cooperative lock reduce this risk.
+
+**Freshness failure:** a writer has a valid lock but is executing a plan formed from stale state. The required post-lock reread and reconciliation address this separate failure mode.
+
+A valid cooperative lock therefore does not prove that the writer's plan is current, and a freshness check does not create technical mutual exclusion.
