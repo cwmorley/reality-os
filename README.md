@@ -33,6 +33,16 @@ In shorthand: **proposal ≠ operational queue ≠ durable domain truth**.
 
 A Canonical Reconciler may import a proposal into the operational queue, but that does not make the proposal true. Likewise, an answered queue item is not safely complete until its durable consequence has been written to the owning canonical source.
 
+## What this looks like in practice
+
+The scenarios below are genericized from recurring patterns in the reference deployment. They illustrate how the protocol is used; they are not additional validation results.
+
+**Resume consequential work without reconstructing old conversations.** An AI session surfaces an unresolved question as a provisional candidate. The Canonical Reconciler checks whether it is still current and consequential, then either imports it into the operational queue or records why it was not imported. When explicit evidence resolves the question, the answer is written to the owning canonical record before the queue item closes. The practical payoff is simple: the system remembers the unresolved work, its provenance, and where the answer must land, so the human does not have to reconstruct it from old transcripts.
+
+**Let several AI systems contribute without giving them identical authority.** One AI may audit a project, another may propose an answer, and a third may maintain canonical state. Each contributes through its assigned role and owned files. Agreement among the AIs does not make a proposal true, and no contributor gains canonical authority merely by sounding confident. The protocol preserves useful parallel contribution while keeping the human-visible decision boundary intact.
+
+**Keep routine context cheap without pretending every task is routine.** A session answering a normal status question loads only the registered current-state sections. If it encounters a conflicting fact, an unclear owner, a financial consequence, or another named escalation trigger, it loads the narrowest additional source needed to resolve the issue. Common work stays lightweight; consequential ambiguity earns more context instead of a guess.
+
 ## What the protocol does
 
 Reality OS specifies cooperative controls for recurring multi-agent failure modes:
@@ -61,3 +71,4 @@ The original deployment runs in an Obsidian vault across Claude, OpenAI's Codex,
 ## Status
 
 Reality OS is a working architecture extracted from a live personal deployment, not a packaged tool. Adopting it means adapting the contracts in `examples/` to your own scopes, canonical sources, ownership boundaries, and evidence requirements—and validating the resulting behavior in your environment before relying on it.
+
