@@ -15,11 +15,23 @@ The protocol's four shorthand invariants are:
 
 The deeper rule beneath all four is that an AI proposal or interpretation does not become reality merely because another AI encounters it later.
 
+The transferable result is not merely a set of Markdown schemas. It is a practice: use independent review to challenge AI-generated designs, keep a complexity budget, and require targeted falsification before trusting a mechanism with durable state. Reality OS is one application of that practice, not a substitute for validating it in a new environment.
+
 ## What's in here
 
 - **[`ARCHITECTURE.md`](./ARCHITECTURE.md)** explains bounded anchor-based context loading, cooperative write governance, cross-agent question routing, epistemic provenance, trust boundaries, and the reference deployment.
 - **[`VALIDATION.md`](./VALIDATION.md)** defines a falsification matrix and separates behavior that has measured evidence from behavior that is specified but not yet empirically tested.
 - **[`examples/`](./examples/)** contains genericized templates of the runtime dispatcher, write-lock contract and state, question-outbox contract, and canonical operational queue.
+
+## What this looks like in practice
+
+The scenarios below are genericized from recurring patterns in the reference deployment. They illustrate how the protocol is used; they are not additional validation results.
+
+This is also the part that matters most day to day, not just architecturally. Real life doesn't pause for a clean handoff—you're mid-thread in one chat when something else pulls you away, and by the time you're back there are four other conversations that happened in between. Without a mechanism for this, an open question either gets silently dropped or you're the one stuck scrolling back through a pile of chat histories trying to reconstruct what was still unresolved. The canonical queue is what remembers instead of you: pick any session back up and the open loop is sitting there, sorted by whether it's actionable now, waiting on something external, or blocked on something else—not buried in a transcript you'd have to go dig for. That's the actual point of calling this an operating system rather than a chat log.
+
+**Let several AI systems contribute without giving them identical authority.** One AI may audit a project, another may propose an answer, and a third may maintain canonical state. Each contributes through its assigned role and owned files. Agreement among the AIs does not make a proposal true, and no contributor gains canonical authority merely by sounding confident. The protocol preserves useful parallel contribution while keeping the human-visible decision boundary intact.
+
+**Keep routine context cheap without pretending every task is routine.** A session answering a normal status question loads only the registered current-state sections. If it encounters a conflicting fact, an unclear owner, a financial consequence, or another named escalation trigger, it loads the narrowest additional source needed to resolve the issue. Common work stays lightweight; consequential ambiguity earns more context instead of a guess.
 
 ## The state model
 
@@ -32,16 +44,6 @@ Reality OS keeps three layers distinct:
 In shorthand: **proposal ≠ operational queue ≠ durable domain truth**.
 
 A Canonical Reconciler may import a proposal into the operational queue, but that does not make the proposal true. Likewise, an answered queue item is not safely complete until its durable consequence has been written to the owning canonical source.
-
-## What this looks like in practice
-
-The scenarios below are genericized from recurring patterns in the reference deployment. They illustrate how the protocol is used; they are not additional validation results.
-
-**Resume consequential work without reconstructing old conversations.** An AI session surfaces an unresolved question as a provisional candidate. The Canonical Reconciler checks whether it is still current and consequential, then either imports it into the operational queue or records why it was not imported. When explicit evidence resolves the question, the answer is written to the owning canonical record before the queue item closes. The practical payoff is simple: the system remembers the unresolved work, its provenance, and where the answer must land, so the human does not have to reconstruct it from old transcripts.
-
-**Let several AI systems contribute without giving them identical authority.** One AI may audit a project, another may propose an answer, and a third may maintain canonical state. Each contributes through its assigned role and owned files. Agreement among the AIs does not make a proposal true, and no contributor gains canonical authority merely by sounding confident. The protocol preserves useful parallel contribution while keeping the human-visible decision boundary intact.
-
-**Keep routine context cheap without pretending every task is routine.** A session answering a normal status question loads only the registered current-state sections. If it encounters a conflicting fact, an unclear owner, a financial consequence, or another named escalation trigger, it loads the narrowest additional source needed to resolve the issue. Common work stays lightweight; consequential ambiguity earns more context instead of a guess.
 
 ## What the protocol does
 
