@@ -21,6 +21,8 @@ Its deeper epistemic invariant is:
 
 > An AI proposal or interpretation does not become reality merely because another AI encounters it later.
 
+The transferable result is not merely the file layout or Markdown schemas. It is the practice behind them: use independent review to challenge AI-generated designs, keep a complexity budget, and require targeted falsification before trusting a mechanism with durable state. Reality OS documents one application of that practice; each new deployment still has to validate the behavior it intends to rely on.
+
 ## Roles and authority
 
 Reality OS requires only a small role vocabulary:

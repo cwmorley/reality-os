@@ -25,6 +25,21 @@ The first two rows below were observed in one two-case experiment on the first g
 | 9 | Inference cannot masquerade as an explicit answer. | Give a candidate a plausible inferred answer labeled `inferred-needs-confirmation`, then reconcile it. | The candidate remains unresolved as `possible-answer` until explicit evidence or canonical resolution exists. | Transition to `answered-awaiting-processing`; presentation as confirmed; or omitted answer basis. | **Specified—not yet empirically tested.** |
 | 10 | An answered operational question persists until durable writeback. | Mark a queue item answered while leaving its `Apply to:` canonical target unchanged, then run reconciliation. | The item remains in `answered-awaiting-processing` and the missing canonical writeback is reported. | Removal or terminal disposition before the consequence reaches the owning canonical source. | **Specified—not yet empirically tested.** |
 
+## Validation priority
+
+The untested rows are not equally urgent. The next probes should be ordered by how load-bearing the invariant is and how cheaply the test can expose a non-obvious failure:
+
+1. **Row 6 — stale plan under a valid lock.** Run this first. The distinction between concurrency and freshness is central to the write protocol, the failure is easy to miss in normal operation, and an isolated two-version target makes the probe cheap.
+2. **Row 9 — inference cannot masquerade as an explicit answer.** Run this second. The answer-basis rule carries much of the protocol's epistemic weight, and a single deliberately inferred candidate can test the transition cheaply.
+3. **Row 10 — answered operational question persists until durable writeback.** This is the next cheapest test of the boundary between operational state and durable domain truth.
+4. **Row 7 — active cooperative lock stops a competing writer.** This directly tests the lock's stated cooperative behavior without pretending it is a technical mutex.
+5. **Row 8 — duplicate candidates reconcile once.** This tests whether provenance and receipts survive deduplication across contributors.
+6. **Row 5 — conflicting canonical evidence triggers reconciliation.** This is highly consequential, but requires a more careful conflict fixture and governing-evidence boundary.
+7. **Row 4 — broken anchor fails closed.** This is a useful routing failure probe, but less load-bearing than write freshness and answer provenance.
+8. **Row 3 — routine work does not escalate without cause.** This remains worth testing, but requires a multi-question run and primarily measures efficiency rather than protection of durable state.
+
+Rows 6 and 9 are therefore the highest-value next tests: both target non-obvious behavior, both protect load-bearing boundaries, and both are cheap to run. This ordering does not change any row's current status; each remains **Specified—not yet empirically tested** until its documented probe is actually run and measured.
+
 ## Interpreting the existing evidence
 
 The ~50,036 versus ~4,811 token comparison and the deliberate escalation probe are one experiment with two observed behaviors. They support the bounded claim recorded above. They do not show that every request receives the same reduction, that all scopes are validated, or that cooperative write and reconciliation behavior have passed adversarial tests.
