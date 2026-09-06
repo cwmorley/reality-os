@@ -1,0 +1,3 @@
+# Keep the generated Code-node source reproducible across Windows and CI.
+integrations/n8n/** text eol=lf
+.github/workflows/* text eol=lf

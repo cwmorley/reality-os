@@ -1,0 +1,106 @@
+TAP version 13
+# Subtest: new ready work is proposed without mutating the supplied snapshot
+ok 1 - new ready work is proposed without mutating the supplied snapshot
+  ---
+  duration_ms: 2.4295
+  type: 'test'
+  ...
+# Subtest: repeated polling suppresses every existing disposition, including deferral
+ok 2 - repeated polling suppresses every existing disposition, including deferral
+  ---
+  duration_ms: 0.6851
+  type: 'test'
+  ...
+# Subtest: a materially newer version remains reviewable despite an old receipt
+ok 3 - a materially newer version remains reviewable despite an old receipt
+  ---
+  duration_ms: 0.1889
+  type: 'test'
+  ...
+# Subtest: unchanged timestamp with altered content fails closed even without observations
+ok 4 - unchanged timestamp with altered content fails closed even without observations
+  ---
+  duration_ms: 0.1598
+  type: 'test'
+  ...
+# Subtest: a stale mirror cannot rewind the previously observed source version
+ok 5 - a stale mirror cannot rewind the previously observed source version
+  ---
+  duration_ms: 0.1822
+  type: 'test'
+  ...
+# Subtest: withdrawal and supersession request receipts without reopening a question
+ok 6 - withdrawal and supersession request receipts without reopening a question
+  ---
+  duration_ms: 0.1661
+  type: 'test'
+  ...
+# Subtest: inferred and explicitly answered candidates still require actual reconciliation
+ok 7 - inferred and explicitly answered candidates still require actual reconciliation
+  ---
+  duration_ms: 0.1756
+  type: 'test'
+  ...
+# Subtest: queued and running work cannot be dispatched again
+ok 8 - queued and running work cannot be dispatched again
+  ---
+  duration_ms: 0.2625
+  type: 'test'
+  ...
+# Subtest: successful process exit and uncertain timeout both require a real receipt before retry
+ok 9 - successful process exit and uncertain timeout both require a real receipt before retry
+  ---
+  duration_ms: 0.1954
+  type: 'test'
+  ...
+# Subtest: a newer source cannot bypass an uncertain older attempt
+ok 10 - a newer source cannot bypass an uncertain older attempt
+  ---
+  duration_ms: 0.227
+  type: 'test'
+  ...
+# Subtest: older queued work must be superseded before the new version is queued
+ok 11 - older queued work must be superseded before the new version is queued
+  ---
+  duration_ms: 0.1537
+  type: 'test'
+  ...
+# Subtest: source content cannot choose its own recipient or authorize a new route
+ok 12 - source content cannot choose its own recipient or authorize a new route
+  ---
+  duration_ms: 0.1395
+  type: 'test'
+  ...
+# Subtest: changing the configured recipient cannot bypass a running or uncertain earlier review
+ok 13 - changing the configured recipient cannot bypass a running or uncertain earlier review
+  ---
+  duration_ms: 0.2031
+  type: 'test'
+  ...
+# Subtest: disabled sources, partial items, and off-hours cannot start new work
+ok 14 - disabled sources, partial items, and off-hours cannot start new work
+  ---
+  duration_ms: 0.1773
+  type: 'test'
+  ...
+# Subtest: malformed or duplicate inputs abort the whole batch before output
+ok 15 - malformed or duplicate inputs abort the whole batch before output
+  ---
+  duration_ms: 0.9358
+  type: 'test'
+  ...
+# Subtest: generated n8n workflow executes the same synthetic planner with no other node types
+ok 16 - generated n8n workflow executes the same synthetic planner with no other node types
+  ---
+  duration_ms: 3.3275
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 116.6996
