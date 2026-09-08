@@ -166,6 +166,12 @@ See [`examples/`](./examples/) for genericized templates of the core files.
 
 These are candidates, not current protocol requirements.
 
+### Optional n8n handoff adapter
+
+The [first n8n framework](./integrations/n8n/) addresses a practical gap: a contributor can leave ready work in an outbox while the human still has to start the receiving agent. It specifies work-hour discovery, bounded dispatch to an assigned reviewer, and receipt-based recovery without granting n8n canonical authority or adding another human queue.
+
+The shipped implementation only classifies synthetic snapshots and exposes the result in a dry-run workflow. The source adapter, durable job store, agent runner, scheduling, and receipt verification remain specified and unimplemented. n8n is optional; the core filesystem protocol and its existing validation status do not depend on it. See the [adapter deployment probes](./VALIDATION.md#optional-n8n-adapter-probes) before enabling real dispatch.
+
 ### Protocol-version metadata
 
 Lightweight fields such as `reality_os_protocol: 1.0` or `contract_revision: 2026-08-31` could identify incompatible contract revisions. They are not mandatory in the current design because no demonstrated multi-version failure yet earns the migration and maintenance cost. Reassess if agents begin operating concurrently under incompatible revisions or a real reconciliation ambiguity cannot be resolved from file history.

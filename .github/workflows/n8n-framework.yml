@@ -1,0 +1,21 @@
+name: n8n framework checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  synthetic-planner:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: node integrations/n8n/build-workflow.mjs
+      - run: git diff --exit-code -- integrations/n8n/workflow.dry-run.json
+      - run: node --test integrations/n8n/planner.test.mjs

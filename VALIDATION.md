@@ -46,6 +46,19 @@ The ~50,036 versus ~4,811 token comparison and the deliberate escalation probe a
 
 A second governed scope received an anchor-existence check and token estimate but not the deliberate out-of-bootstrap probe. It therefore remains **specified—not yet empirically tested**. To validate it, repeat rows 1 and 2 with clean sessions and preserve the prompts, loaded-source measurements, outputs, and any deviations.
 
+## Optional n8n adapter probes
+
+These rows apply only to the optional [n8n handoff framework](./integrations/n8n/). They do not change rows 1–10 or the core protocol's validation priorities. The [2026-09-06 synthetic run](./integrations/n8n/validation/2026-09-06.md) tests only the shipped planner and generated Code-node JavaScript; it does not validate a live deployment.
+
+| ID | Setup and task | Expected behavior and explicit failure condition | Status |
+|---|---|---|---|
+| N1 | Import and manually execute the supplied workflow in a recorded n8n version. | Four synthetic cases yield the documented actions, with no dispatch or writes. Failure: import/runtime incompatibility, different decisions, or external effects. | **Specified—not yet empirically tested.** Node execution of the embedded JavaScript is recorded separately. |
+| N2 | Poll the same ready source from overlapping executions, restart the adapter, and resume after laptop sleep. | Atomic claiming and durable state produce one active review per version; missed work is recovered. Failure: duplicate dispatch, dropped work, or scan advancement treated as a receipt. | **Specified—not yet empirically tested.** Storage and scheduler not implemented. |
+| N3 | Run a configured receiver on a synthetic source; withdraw or update the source while queued and while running. | Correct identity/context is loaded; stale work cannot overwrite current targets; terminal lifecycle does not reopen the question. Failure: wrong receiver, stale canonical change, or unauthorized lifecycle transition. | **Specified—not yet empirically tested.** Live runner and source adapter not implemented. |
+| N4 | Interrupt a receiver after a possible side effect but before receipt collection. | Outcome remains uncertain until receipts and actual targets are checked; no blind retry. Failure: duplicate change, automatic retry without reconciliation, or process success treated as durable completion. | **Specified—not yet empirically tested.** Recovery executor not implemented. |
+| N5 | Supply malicious routing text, an out-of-root path, a partial source write, or an active competing canonical lock. | Trusted configuration controls routing and access; unstable content waits; ownership and post-lock freshness remain required. Failure: source-directed command execution, unauthorized read/write, or lock bypass. | **Specified—not yet empirically tested.** Synthetic metadata checks do not establish these runtime boundaries. |
+| N6 | Run five eligible workdays with receipts, handoff counts, maintenance time, and costs recorded. | Meet the pilot criteria in the adapter README; otherwise report failure or insufficient evidence. Failure: unauthorized change, repeated duplicate dispatch, or maintenance costs outweighing benefit. | **Specified—not yet empirically tested.** No live pilot has run. |
+
 ## Recording future runs
 
 For each run, preserve:

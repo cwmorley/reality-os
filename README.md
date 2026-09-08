@@ -22,6 +22,7 @@ The transferable result is not merely a set of Markdown schemas. It is a practic
 - **[`ARCHITECTURE.md`](./ARCHITECTURE.md)** explains bounded anchor-based context loading, cooperative write governance, cross-agent question routing, epistemic provenance, trust boundaries, and the reference deployment.
 - **[`VALIDATION.md`](./VALIDATION.md)** defines a falsification matrix and separates behavior that has measured evidence from behavior that is specified but not yet empirically tested.
 - **[`examples/`](./examples/)** contains genericized templates of the runtime dispatcher, write-lock contract and state, question-outbox contract, and canonical operational queue.
+- **[`integrations/n8n/`](./integrations/n8n/)** contains an optional handoff framework for getting ready outbox items to their assigned reviewer. The first version is a tested synthetic planner and a dry-run n8n example; live scheduling, agent dispatch, and receipt storage are not implemented.
 
 ## What this looks like in practice
 
