@@ -4,7 +4,7 @@
 
 ## Summary
 
-Reality OS specifies how independent AI sessions can coordinate through plain files while preserving human authority, bounded context, write ownership, epistemic provenance, and durable reconciliation. The original deployment uses an Obsidian vault, but the protocol itself depends only on a shared filesystem and cooperating participants that read and follow its contracts.
+Reality OS specifies how independent AI sessions can coordinate around plain files while preserving human authority, bounded context, write ownership, epistemic provenance, and durable reconciliation. The original deployment uses an Obsidian vault, but the protocol itself depends only on a shared filesystem for canonical state and cooperating participants that follow its contracts through direct access or bounded handoffs.
 
 There is no orchestration framework underneath it: no agent runtime, database, vector store, central server, background daemon, or technical lock service. Context routing, proposal transport, write coordination, and reconciliation are expressed through Markdown contracts and operational state files.
 
@@ -32,7 +32,7 @@ Reality OS requires only a small role vocabulary:
 - **Provisional Contributor** may propose candidates through an owned outbox or working domain but does not directly modify the canonical operational queue.
 - **Canonical Reconciler** owns reconciliation into the canonical operational queue and records a disposition for each reviewed candidate version.
 
-These are architectural roles, not product identities. In the reference deployment, the human vault owner fills Human Authority; Codex currently fills the Canonical Reconciler role; and Claude, Codex, ChatGPT, and Gemini may act as Provisional Contributors or scoped Canonical Writers where explicitly authorized.
+These are architectural roles, not product identities. In the reference deployment, the human vault owner fills Human Authority and Codex currently fills the Canonical Reconciler role. Claude and Codex have direct vault access within their assigned boundaries; ChatGPT and Gemini can contribute through bounded handoffs when direct access is unavailable. A session without vault access cannot write canonical vault files, and no product gains a role merely by being named here.
 
 ## The three state layers
 
@@ -50,7 +50,7 @@ Reconciliation can move a qualifying proposal into the operational queue without
 
 The default failure mode for an AI working against a large knowledge base is loading far more than the task needs. A routine “what is the current state of X?” request rarely requires the full history of X, but sessions tend to load everything unless a contract makes the routine path narrower.
 
-Reality OS routes each session through a compact root dispatcher (`AGENTS.md`, under 1,000 tokens in the reference deployment). The dispatcher resolves the session to a registered scope before content loads. For a resolved scope, the agent loads only pre-registered sections of canonical notes, addressed by exact heading (`Path/Note.md#Heading Name`), rather than whole files. A 19,000-token note may expose a 270-token “Current state” section for routine work.
+In the reference deployment, file-capable sessions start with a root dispatcher (`AGENTS.md`). Its size changes as scopes and protections evolve; the measured experiment below describes the tested snapshot, not a permanent dispatcher size. The dispatcher resolves the session to a registered scope before content loads. For a resolved scope, the agent loads only pre-registered sections of canonical notes, addressed by exact heading (`Path/Note.md#Heading Name`), rather than whole files. A 19,000-token note may expose a 270-token “Current state” section for routine work. Sessions without direct vault access receive the smallest task-specific handoff needed; that packet transports context and proposals but is not an independent source of truth.
 
 Bounded loading must not become bounded blindness. Named escalation triggers require cooperating agents to expand context when, for example, loaded facts conflict or look stale, money or another scope is affected, ownership is unclear, or answering would otherwise require guessing. The agent names the trigger and loads the narrowest resolving source instead of silently guessing or silently reverting to a full-vault load.
 
@@ -186,4 +186,4 @@ No stronger lock is implemented. Reassess only after two material collision or o
 
 ---
 
-*The reference deployment runs on Obsidian using Claude, OpenAI's Codex, ChatGPT, and Gemini as independent collaborating sessions. Those products demonstrate one deployment; they do not define the protocol. Human Authority retains final decision authority over canonical change.*
+*The reference deployment uses Obsidian with Claude, OpenAI's Codex, ChatGPT, and Gemini as independent collaborators with different access paths and authority. Those products demonstrate one deployment; they do not define the protocol. Human Authority retains final decision authority over canonical change.*
