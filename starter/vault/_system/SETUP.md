@@ -53,6 +53,6 @@ Offer, don't insist: "Want to see how corrections work? Pick any line I wrote to
 
 Tell them:
 
-1. Open Obsidian, choose **Open folder as vault**, and pick this folder. `Home.md` is the front page.
-2. Tomorrow, start with the **Start my day** prompt in `Prompts.md`, and end with **Wrap up**.
-3. After the first week, if they want a second app, the README explains how to add ChatGPT to the same vault.
+1. Open Obsidian. The vault is already listed if they used the installer; otherwise choose **Open folder as vault** and pick this folder. `Home.md` is the front page.
+2. Open the ChatGPT desktop app, open this same folder (Ctrl+O), choose **Ask for approval**, and paste: "Read AGENTS.md. In five bullets, tell me what you know about me and my work. Then suggest one improvement to my top project." If ChatGPT describes their work correctly, both apps now share the same memory.
+3. Tomorrow, start with the **Start my day** prompt in `Prompts.md`, and end with **Wrap up**.

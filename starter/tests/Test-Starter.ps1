@@ -97,6 +97,28 @@ Write-Host $out
 Check ($out -match 'Days with at least one change: 1 of 14') "Show-Usage.ps1 counts active days"
 Check ($out -match 'Changes by Claude: 1') "Show-Usage.ps1 counts commits by app"
 
+# 6. The one-step installer (apps skipped; Obsidian settings in a scratch APPDATA).
+$realAppData = $env:APPDATA
+$env:APPDATA = Join-Path $work 'appdata'
+$env:REALITYOS_NO_AUTORUN = '1'
+. (Join-Path $kit 'install.ps1')
+$vault2 = Join-Path $work 'Vault2'
+$r = @(Install-RealityOS -SkipApps -LocalKit (Split-Path -Parent $kit) -VaultPath $vault2 -Name 'CI User' -Email 'ci@example.invalid')
+Check ($r[-1] -eq $true) "install.ps1 completes with apps skipped"
+Check (Test-Path -LiteralPath (Join-Path $vault2 'AGENTS.md')) "install.ps1 creates the vault"
+$obs = Join-Path $env:APPDATA 'obsidian\obsidian.json'
+$reg = $null
+try { $reg = [IO.File]::ReadAllText($obs) | ConvertFrom-Json } catch { }
+$entries = @()
+if ($reg) { $entries = @($reg.vaults.PSObject.Properties | ForEach-Object { $_.Value }) }
+Check ($entries.Count -eq 1 -and $entries[0].path -eq $vault2 -and $entries[0].open -eq $true) "install.ps1 registers the vault in Obsidian and marks it open"
+$r = @(Install-RealityOS -SkipApps -LocalKit (Split-Path -Parent $kit) -VaultPath $vault2)
+$reg = [IO.File]::ReadAllText($obs) | ConvertFrom-Json
+Check ($r[-1] -eq $true -and @($reg.vaults.PSObject.Properties).Count -eq 1) "running install.ps1 again changes nothing"
+Check ("$(& git -C $vault2 rev-list --count HEAD 2>$null)".Trim() -eq '1') "the second run left the vault's history alone"
+$env:APPDATA = $realAppData
+Remove-Item Env:\REALITYOS_NO_AUTORUN
+
 Write-Host ""
 Write-Host "$failed check(s) failed."
 exit $failed
