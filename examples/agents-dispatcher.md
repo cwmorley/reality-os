@@ -1,6 +1,6 @@
 # Reality OS runtime dispatcher (example)
 
-This is a genericized version of the root dispatcher every cooperating AI session reads first. In the reference deployment, this file is under 1,000 tokens and is the only governance file loaded before the session resolves to a scope. Replace `Project Alpha` and the example paths with your own registered scopes and canonical anchors.
+This is a genericized version of the root dispatcher every cooperating AI session reads first. In the reference deployment, this file is the only governance file loaded before the session resolves to a scope. Its size changes as scopes and protections evolve, so keep yours as small as the rules allow. Replace `Project Alpha` and the example paths with your own registered scopes and canonical anchors.
 
 The dispatcher governs context loading; it is not an access-control mechanism. A tool may technically retain access to files outside the resolved bootstrap.
 
