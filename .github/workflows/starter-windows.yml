@@ -1,10 +1,10 @@
 name: starter kit on Windows
+# Runs on every pull request (not only starter changes) so it can be a
+# required status check for main: people run the installer from main.
 on:
   pull_request:
-    paths: ['starter/**', '.github/workflows/starter-windows.yml']
   push:
     branches: [main]
-    paths: ['starter/**', '.github/workflows/starter-windows.yml']
 permissions:
   contents: read
 jobs:
