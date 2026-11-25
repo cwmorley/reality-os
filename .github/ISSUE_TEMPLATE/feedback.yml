@@ -1,0 +1,35 @@
+name: How it's working for me
+description: Tell us how the starter is going, good or bad. Nothing in your vault reaches us, so this is how we learn.
+title: "[feedback] "
+labels: ["starter", "feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Short and honest is perfect, including "I haven't used it much." Please don't paste your notes or anything private.
+  - type: input
+    id: days
+    attributes:
+      label: Roughly how many days have you used it so far?
+      description: '`_system\Show-Usage.ps1` in your vault counts this from the history.'
+  - type: textarea
+    id: helped
+    attributes:
+      label: Two things it did that you'd otherwise have done by hand, or not at all
+  - type: textarea
+    id: annoying
+    attributes:
+      label: What got in the way, or annoyed you?
+  - type: dropdown
+    id: apps
+    attributes:
+      label: Which apps do you use with it?
+      multiple: true
+      options:
+        - Claude (Code tab)
+        - ChatGPT
+        - Obsidian on its own
+  - type: textarea
+    id: else
+    attributes:
+      label: Anything else?

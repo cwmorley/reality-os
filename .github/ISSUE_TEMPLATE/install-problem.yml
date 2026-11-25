@@ -1,0 +1,40 @@
+name: Install or setup problem
+description: The installer, Test-Vault, the backup or setup didn't work as the starter guide says.
+title: "[install] "
+labels: ["starter", "install"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this. **Don't paste anything from your notes**, and check that nothing below contains a password, API key or token.
+  - type: dropdown
+    id: step
+    attributes:
+      label: Which step?
+      options:
+        - Installer (install.ps1)
+        - Setup with Claude (SETUP.md)
+        - Adopting an existing vault (alpha)
+        - ChatGPT
+        - Obsidian
+        - Backup
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: testvault
+    attributes:
+      label: Test-Vault output
+      description: 'Run `powershell -NoProfile -ExecutionPolicy Bypass -File "$HOME\Vault\_system\Test-Vault.ps1"` and paste the result. It lists checks, not your notes.'
+      render: text
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: Windows 11 Home 24H2
