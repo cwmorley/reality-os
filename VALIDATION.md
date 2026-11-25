@@ -61,7 +61,7 @@ These rows apply only to the optional [n8n handoff framework](./integrations/n8n
 
 ## Starter kit probes
 
-These rows apply only to the [Windows starter](./starter/). They do not change rows 1–10. The CI job `starter kit on Windows` checks the scripts on Windows PowerShell 5.1 (vault creation, refusal to overwrite, and Test-Vault failing on known breakages); it does not test either AI app's behavior.
+These rows apply only to the [Windows starter](./starter/). They do not change rows 1–10. The CI job `starter kit on Windows` (first passed 2026-11-24 on windows-latest, Windows PowerShell 5.1) checks the scripts only: vault creation, refusal to overwrite, ignored per-device files, and Test-Vault failing on known breakages. It does not test either AI app's behavior; S1–S4 do.
 
 | ID | Setup and task | Expected behavior and explicit failure condition | Status |
 |---|---|---|---|

@@ -25,7 +25,7 @@ Write-Host ""
 
 # 1. Files and folders
 $files = @('AGENTS.md', 'CLAUDE.md', 'Home.md', 'Inbox.md', 'Open Loops.md', 'About.md', 'Prompts.md',
-           '.gitattributes', '.gitignore', '_system\Corrections.md', '_system\SETUP.md',
+           '.gitattributes', '.gitignore', '_system\Corrections.md', '_system\SETUP.md', '.claude\settings.json',
            'Templates\Daily.md', 'Templates\Project.md', 'Templates\Decision.md',
            'Templates\Meeting.md', 'Templates\Person.md', 'Templates\Weekly Review.md')
 $dirs = @('Daily', 'Projects', 'Decisions', 'Meetings', 'People', 'Notes', 'Templates',
@@ -68,8 +68,10 @@ if (-not $git) {
     Fail "Git is not installed or not on PATH. Run: winget install --id Git.Git -e   then close and reopen this window (and restart the Claude and ChatGPT apps)."
 } else {
     Pass "Git is installed"
-    $inside = & git -C $Path rev-parse --is-inside-work-tree 2>$null
-    if ($LASTEXITCODE -eq 0 -and "$inside".Trim() -eq 'true') {
+    $inside = (& git -C $Path rev-parse --is-inside-work-tree 2>&1 | ForEach-Object { "$_" }) -join "`n"
+    if ($inside -match 'dubious ownership') {
+        Fail "Git refuses this folder because a different Windows user owns it (this can happen when an app runs commands as a sandbox user). Run: git config --global --add safe.directory `"$($Path -replace '\\','/')`""
+    } elseif ($LASTEXITCODE -eq 0 -and $inside.Trim() -eq 'true') {
         Pass "the vault is a Git repository"
         $name = & git -C $Path config user.name 2>$null
         $mail = & git -C $Path config user.email 2>$null

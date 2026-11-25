@@ -9,10 +9,10 @@ Read this file, `Home.md`, `Open Loops.md`, the newest note in `Daily/`, and the
 ## Starter rules
 
 1. **Read first.** Before acting, read this file and every note you're about to change. If you haven't read it this session, you don't know it.
-2. **Show before you change.** Before you change any note outside `_proposals/<your app>/`, tell me what you'll change and why, and make the change only after I say yes. Appending one line to today's Daily note or to `Inbox.md` needs no approval. After each change, commit it to Git with a one-line message that starts with your app's name (`claude:` or `chatgpt:`).
+2. **Show before you change.** Before you change any note outside `_proposals/<your app>/`, tell me what you'll change and why, and make the change only after I say yes. When your app shows me the change in its own approval prompt, my approving it there is the yes; don't ask twice. Four things need no approval: creating today's Daily note from its template, appending one line to it, appending to `Inbox.md`, and adding an entry to `_system/Corrections.md`. After each change, commit it to Git with a one-line message that starts with your app's name (`claude:` or `chatgpt:`). If you can't commit, say so; don't skip it silently.
 3. **Label what you know.** Mark claims FACT (with its source), INFERENCE or GUESS. Never invent names, numbers, quotes or results. Repeating an old claim is not new evidence.
 4. **Ask before anything leaves this machine or costs money.** Sending, posting, submitting, buying or deleting: ask me every time, even if I said yes before.
-5. **Leave a trail.** Before you stop, add a line to today's Daily note saying what changed, put anything unfinished in `Open Loops.md`, and commit. Decided is not done.
+5. **Leave a trail.** Before ending a session in which you changed files, add a line to today's Daily note saying what changed, put anything unfinished in `Open Loops.md`, and commit. Decided is not done.
 
 ## Standing rules
 

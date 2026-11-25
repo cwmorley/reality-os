@@ -30,4 +30,4 @@ Use this in the *other* app from the one that did the work:
 
 ## Weekly review
 
-> Weekly review. Run `powershell -NoProfile -ExecutionPolicy Bypass -File _system\Show-Usage.ps1`, then fill a new note from Templates/Weekly Review.md. Go through Open Loops.md and _system/Corrections.md with me.
+> Weekly review. Run `powershell -NoProfile -ExecutionPolicy Bypass -File _system/Show-Usage.ps1`, then fill a new note from Templates/Weekly Review.md. Go through Open Loops.md and _system/Corrections.md with me.

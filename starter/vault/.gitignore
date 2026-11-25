@@ -1,6 +1,9 @@
-# Obsidian per-device UI state
-.obsidian/workspace*.json
-.obsidian/cache
+# Obsidian writes per-device settings here; keep only the two shipped files.
+.obsidian/*
+!.obsidian/daily-notes.json
+!.obsidian/templates.json
 .trash/
+# Per-device Claude settings
+.claude/settings.local.json
 # Setup probe file
 _system/.probe

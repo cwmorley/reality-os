@@ -2,7 +2,7 @@
 
 ## Usage
 
-Paste the output of `_system\Show-Usage.ps1` here.
+Paste the output of `_system/Show-Usage.ps1` here.
 
 ## What it did this week
 

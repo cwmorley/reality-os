@@ -28,7 +28,9 @@ foreach ($s in $scripts) {
     Check ($errs.Count -eq 0) "$($s.Name) parses"
 }
 
-$work = Join-Path $env:RUNNER_TEMP ("starter-" + [guid]::NewGuid().ToString('N').Substring(0, 8))
+$tempRoot = $env:RUNNER_TEMP
+if (-not $tempRoot) { $tempRoot = [IO.Path]::GetTempPath() }
+$work = Join-Path $tempRoot ("starter-" + [guid]::NewGuid().ToString('N').Substring(0, 8))
 New-Item -ItemType Directory -Path $work | Out-Null
 $vault = Join-Path $work 'Vault'
 $newVault = Join-Path $kit 'tools\New-Vault.ps1'
@@ -38,6 +40,12 @@ $code = Run-Ps $newVault @('-Path', $vault, '-Name', 'CI User', '-Email', 'ci@ex
 Check ($code -eq 0) "New-Vault.ps1 creates a vault (exit $code)"
 Check (Test-Path -LiteralPath (Join-Path $vault '.gitignore')) "dotfiles were copied"
 Check (Test-Path -LiteralPath (Join-Path $vault '.obsidian\daily-notes.json')) "Obsidian settings were copied"
+$settingsOk = $false
+try { $settings = [IO.File]::ReadAllText((Join-Path $vault '.claude\settings.json')) | ConvertFrom-Json; $settingsOk = (@($settings.permissions.allow) -contains 'Bash(git commit:*)') } catch { }
+Check $settingsOk "Claude project settings were copied and parse"
+$tracked = @(& git -C $vault ls-files 2>$null)
+Check ($tracked -contains '.claude/settings.json') "Claude project settings are committed"
+Check ($tracked -contains '.obsidian/templates.json') "shipped Obsidian settings are committed"
 $count = "$(& git -C $vault rev-list --count HEAD 2>$null)".Trim()
 Check ($count -eq '1') "the vault has its first commit ($count)"
 $branch = "$(& git -C $vault rev-parse --abbrev-ref HEAD 2>$null)".Trim()
@@ -75,7 +83,12 @@ Check ((Run-Ps $testVault @()) -ne 0) "Test-Vault.ps1 fails when a starter note 
 
 Check ((Run-Ps $testVault @()) -eq 0) "Test-Vault.ps1 passes again once repaired"
 
-# 4. Show-Usage counts app commits.
+# 4. Obsidian's own per-device files stay out of Git.
+[IO.File]::WriteAllText((Join-Path $vault '.obsidian\app.json'), "{}", $enc)
+$status = @(& git -C $vault status --porcelain --ignored=no -- .obsidian 2>$null | Where-Object { $_ })
+Check ($status.Count -eq 0) "Obsidian's app.json is ignored"
+
+# 5. Show-Usage counts app commits.
 Add-Content -LiteralPath (Join-Path $vault 'Inbox.md') -Value 'test item'
 & git -C $vault add -A
 & git -C $vault commit -q -m "claude: test commit"

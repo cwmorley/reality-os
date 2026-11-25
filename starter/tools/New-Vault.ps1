@@ -48,8 +48,10 @@ $globalName = "$(& git config --global user.name 2>$null)".Trim()
 $globalMail = "$(& git config --global user.email 2>$null)".Trim()
 if (-not $Name) { $Name = $globalName }
 if (-not $Email) { $Email = $globalMail }
-if (-not $Name) { $Name = Read-Host "Your name (used to label your own changes in the vault's history)" }
-if (-not $Email) { $Email = Read-Host "Your email (stays on this computer; Git just needs one)" }
+$canAsk = -not [Console]::IsInputRedirected
+if (-not $Name -and $canAsk) { $Name = Read-Host "Your name (used to label your own changes in the vault's history)" }
+if (-not $Email -and $canAsk) { $Email = Read-Host "Your email (stays on this computer; Git just needs one)" }
+if (-not $Name -or -not $Email) { Write-Host "No name or email given; using placeholders. Change them later with git config in the vault." }
 if (-not $Name) { $Name = 'Vault owner' }
 if (-not $Email) { $Email = 'owner@localhost' }
 if ($Name -ne $globalName) { & git -C $Path config user.name $Name }
