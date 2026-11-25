@@ -1,10 +1,40 @@
 # Reality OS
 
+**An Obsidian vault that Claude and ChatGPT share, under rules you control.** Your notes stay on your computer. Both apps read the same files about your work, show you every change before they make it, and turn your corrections into rules. Git keeps the history, and an hourly backup can copy the vault to your own private GitHub repository.
+
+## Start here
+
+**New to this? Set up a vault on Windows (about 75 minutes, mostly the AI interviewing you).** Open PowerShell and paste:
+
+```powershell
+irm https://raw.githubusercontent.com/cwmorley/reality-os/main/starter/install.ps1 | iex
+```
+
+It installs Git, Obsidian, Claude and ChatGPT, then builds your vault. You'll need a paid Claude plan (Pro is enough) and a ChatGPT account. Then follow the **[starter guide](./starter/README.md)**.
+
+**Already have an Obsidian vault? (alpha)** Reality OS can be added to it without moving, renaming or rewriting your notes:
+
+```powershell
+$env:REALITYOS_ADOPT = "C:\Users\<you>\Documents\My Vault"; irm https://raw.githubusercontent.com/cwmorley/reality-os/main/starter/install.ps1 | iex
+```
+
+See [Already have a vault?](./starter/README.md#already-have-a-vault-alpha) in the starter guide first.
+
+**Stuck, or want to say how it's going?** [Open an issue](https://github.com/cwmorley/reality-os/issues/new/choose): there's one form for install problems and one for feedback. Nothing in your vault is ever sent here, so this is the only way we find out what works.
+
+The starter is new and hasn't yet been tested with real users; [VALIDATION.md](./VALIDATION.md#starter-kit-probes) lists what's still being tested.
+
+---
+
+## The protocol behind it
+
+The rest of this page is for people interested in the architecture: how several independent AI systems can work over one shared set of notes safely.
+
 **A filesystem-native governance protocol for multiple independent AI systems operating on shared durable knowledge—with no framework, database, or shared runtime.**
 
 Reality OS began as a personal operating system built in Markdown inside Obsidian. This repository documents the coordination architecture that emerged from that deployment: how independent AI products can work over one shared file store while keeping context bounded, writes governed, inference labeled, and reconciliation durable.
 
-It is a pattern, not a packaged product. Nothing here requires Obsidian specifically. It requires a shared filesystem, explicit governance contracts, and cooperating AI sessions that read and follow those contracts before acting.
+The protocol is a pattern, not a packaged product; the starter above is one packaged application of it. The protocol doesn't require Obsidian specifically. It requires a shared filesystem, explicit governance contracts, and cooperating AI sessions that read and follow those contracts before acting.
 
 The protocol's four shorthand invariants are:
 
@@ -22,7 +52,7 @@ The transferable result is not merely a set of Markdown schemas. It is a practic
 - **[`ARCHITECTURE.md`](./ARCHITECTURE.md)** explains bounded anchor-based context loading, cooperative write governance, cross-agent question routing, epistemic provenance, trust boundaries, and the reference deployment.
 - **[`VALIDATION.md`](./VALIDATION.md)** defines a falsification matrix and separates behavior that has measured evidence from behavior that is specified but not yet empirically tested.
 - **[`examples/`](./examples/)** contains genericized templates of the runtime dispatcher, write-lock contract and state, question-outbox contract, and canonical operational queue.
-- **[`starter/`](./starter/)** is a Windows starter vault for one person, set up by a one-line installer. It's plain Markdown notes that the Claude and ChatGPT desktop apps both work in under five shared rules, with an AI-run setup interview, Git as the undo, an hourly backup that can push to a private GitHub repository, a written process for turning corrections into rules, and a voice note so drafts sound like the owner. It applies four of the habits described here to one person's notes, and is untested with real users so far (see rows S1–S7, A1 and A2 in `VALIDATION.md`). It can also adopt a vault you already have (alpha), without rewriting your notes.
+- **[`starter/`](./starter/)** is the Windows starter described in [Start here](#start-here). It applies four of the habits below (read before writing, show before changing, label what's known, keep a trail) to one person's notes.
 - **[`integrations/n8n/`](./integrations/n8n/)** contains an optional handoff framework for getting ready outbox items to their assigned reviewer. The first version is a tested synthetic planner and a dry-run n8n example; live scheduling, agent dispatch, and receipt storage are not implemented.
 
 ## What this looks like in practice
@@ -74,5 +104,5 @@ The original deployment runs in an Obsidian vault across Claude, OpenAI's Codex,
 
 ## Status
 
-Reality OS is a working architecture extracted from a live personal deployment, not a packaged tool. Adopting it means adapting the contracts in `examples/` to your own scopes, canonical sources, ownership boundaries, and evidence requirements—and validating the resulting behavior in your environment before relying on it.
+The protocol is a working architecture extracted from a live personal deployment, not a packaged tool (the starter is the packaged part). Adopting it means adapting the contracts in `examples/` to your own scopes, canonical sources, ownership boundaries, and evidence requirements—and validating the resulting behavior in your environment before relying on it.
 
