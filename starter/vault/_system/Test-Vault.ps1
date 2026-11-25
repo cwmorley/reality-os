@@ -111,8 +111,8 @@ if ($synced) { Warn "the vault is inside OneDrive. Sync can create conflict copi
 else { Pass "the vault is not inside OneDrive" }
 
 # 7. Setup finished
-$aboutPath = Join-Path $Path 'About.md'
-if ((Test-Path -LiteralPath $aboutPath) -and (([IO.File]::ReadAllText($aboutPath)) -match '\(fill in during setup\)')) {
+$homePath = Join-Path $Path 'Home.md'
+if ((Test-Path -LiteralPath $homePath) -and (([IO.File]::ReadAllText($homePath)) -match 'Setup: not started')) {
     Warn "setup is not finished yet. In the Claude Code tab, say: Read _system/SETUP.md and follow it."
 } else {
     Pass "setup has been run"

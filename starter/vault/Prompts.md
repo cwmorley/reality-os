@@ -4,7 +4,7 @@ Copy one of these into Claude or ChatGPT. They work the same in both apps.
 
 ## Start my day
 
-> Start of day. Read AGENTS.md, Home.md, Open Loops.md, the newest Daily note and `git log --since=yesterday --oneline`. Create today's Daily note from Templates/Daily.md. Then tell me in under 10 lines: what's open, what's due or overdue, and the one thing you'd do first and why.
+> Start of day. Read AGENTS.md, Home.md, Open Loops.md, the newest Daily note and `git log -10 --oneline`. Create today's Daily note from Templates/Daily.md. Then tell me in under 10 lines: what's open, what's due or overdue, and the one thing you'd do first and why.
 
 ## Capture
 
@@ -12,17 +12,17 @@ Copy one of these into Claude or ChatGPT. They work the same in both apps.
 
 Then later:
 
-> Sort my Inbox. For each item, tell me which note it goes to and the exact line you'd add. Make the changes I approve, then commit.
+> Sort my Inbox. Move each item to the note it belongs in, following AGENTS.md, then commit.
 
 ## Wrap up
 
-> Wrap up. Add to today's Daily note what changed today, move anything unfinished into Open Loops.md, show me the changes, and commit after I say yes.
+> Wrap up. Add to today's Daily note what changed today, move anything unfinished into Open Loops.md, and update the Next step on any project that moved. Then commit.
 
 ## Second opinion
 
-Use this in the *other* app from the one that did the work:
+Use this in the *other* app from the one that did the work, once you use two apps:
 
-> Second opinion. Read what changed today (`git log --since=today --stat`) and the notes it touched. Tell me what's wrong, missing or overstated first, then what's good. Don't change those notes. Put your review in your _proposals folder and commit it.
+> Second opinion. Read what changed today (`git log --since=midnight --stat`) and the notes it touched. Tell me what's wrong, missing or overstated first, then what's good. Don't change those notes. Put your review in your _proposals folder and commit it.
 
 ## Correct it
 

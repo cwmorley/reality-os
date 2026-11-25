@@ -41,8 +41,8 @@ Check ($code -eq 0) "New-Vault.ps1 creates a vault (exit $code)"
 Check (Test-Path -LiteralPath (Join-Path $vault '.gitignore')) "dotfiles were copied"
 Check (Test-Path -LiteralPath (Join-Path $vault '.obsidian\daily-notes.json')) "Obsidian settings were copied"
 $settingsOk = $false
-try { $settings = [IO.File]::ReadAllText((Join-Path $vault '.claude\settings.json')) | ConvertFrom-Json; $settingsOk = (@($settings.permissions.allow) -contains 'Bash(git commit:*)') } catch { }
-Check $settingsOk "Claude project settings were copied and parse"
+try { $settings = [IO.File]::ReadAllText((Join-Path $vault '.claude\settings.json')) | ConvertFrom-Json; $allow = @($settings.permissions.allow); $settingsOk = (($allow -contains 'Bash(git commit *)') -and ($allow -contains 'PowerShell(git commit *)')) } catch { }
+Check $settingsOk "Claude project settings were copied, parse, and cover both Bash and PowerShell"
 $tracked = @(& git -C $vault ls-files 2>$null)
 Check ($tracked -contains '.claude/settings.json') "Claude project settings are committed"
 Check ($tracked -contains '.obsidian/templates.json') "shipped Obsidian settings are committed"
