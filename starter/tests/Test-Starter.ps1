@@ -170,6 +170,79 @@ Check ($code -eq 0 -and (Get-ScheduledTask -TaskName $taskName -ErrorAction Sile
 $code = Run-Ps $enable @('-Path', $vault2, '-TaskName', $taskName, '-Disable')
 Check ($code -eq 0 -and -not (Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue)) "Enable-Backup.ps1 -Disable removes it"
 
+# 8. Adopting an existing vault (alpha).
+$adoptScript = Join-Path $kit 'tools\Adopt-Vault.ps1'
+$realOneDrive = $env:OneDrive
+$fakeOneDrive = Join-Path $work 'OneDriveSim'
+$env:OneDrive = $fakeOneDrive
+$old = Join-Path $fakeOneDrive 'My Notes'
+foreach ($d in @('Journal\Daily', '_templates', 'Clients', '.obsidian')) { New-Item -ItemType Directory -Force -Path (Join-Path $old $d) | Out-Null }
+$seed = @{
+    'Clients\Acme.md' = "---`ntags: [client]`nowner: me`n---`n# Acme`n`n## Status`nRenewal talks. [[Jane Doe]]`n"
+    'Journal\Daily\2026-11-20.md' = "# 2026-11-20`n- wrote this by hand " + [string][char]0x2014 + " with a dash`n"
+    '_templates\Client.md' = "---`ntags: [client]`n---`n# {{title}}`n`n## Status`n"
+    'CLAUDE.md' = "Be brief. Use British spelling.`n"
+    'Ideas.md' = "# Ideas`n`n- one`n"
+    '.obsidian\daily-notes.json' = '{"folder":"Journal/Daily","format":"YYYY-MM-DD"}'
+    '.obsidian\templates.json' = '{"folder":"_templates"}'
+    '.obsidian\workspace.json' = '{"main":{}}'
+}
+foreach ($k in $seed.Keys) { [IO.File]::WriteAllText((Join-Path $old $k), $seed[$k], $enc) }
+$before = @{}
+foreach ($k in $seed.Keys) { $before[$k] = (Get-FileHash -LiteralPath (Join-Path $old $k)).Hash }
+
+$code = Run-Ps $adoptScript @('-Path', $old, '-Name', 'CI User', '-Email', 'ci@example.invalid')
+Check ($code -eq 0) "Adopt-Vault.ps1 adopts a handwritten vault (exit $code)"
+$changed = @($seed.Keys | Where-Object { (Get-FileHash -LiteralPath (Join-Path $old $_)).Hash -ne $before[$_] })
+Check ($changed.Count -eq 0) ("the owner's notes and settings are byte-for-byte unchanged" + $(if ($changed.Count) { ': ' + ($changed -join ', ') } else { '' }))
+$gitPointer = Join-Path $old '.git'
+$absGit = "$(& git -C $old rev-parse --absolute-git-dir 2>$null)".Trim() -replace '/', '\'
+Check ((Test-Path -LiteralPath $gitPointer -PathType Leaf) -and $absGit -and -not $absGit.StartsWith($fakeOneDrive, [StringComparison]::OrdinalIgnoreCase)) "a vault in OneDrive keeps its Git history outside OneDrive ($absGit)"
+$msgs = @(& git -C $old log --reverse --format=%s 2>$null)
+Check ($msgs.Count -eq 2 -and $msgs[0] -eq 'adopt: before Reality OS' -and $msgs[1] -eq 'adopt: add Reality OS files') ("history is the snapshot, then the Reality OS files (" + ($msgs -join ' | ') + ")")
+$snap = @(& git -C $old ls-tree -r --name-only HEAD~1 2>$null)
+Check (($snap -contains 'Clients/Acme.md') -and ($snap -contains 'CLAUDE.md') -and -not ($snap -contains 'AGENTS.md')) "the snapshot holds the vault as it was"
+Check (-not (@(& git -C $old ls-files 2>$null) -contains '.obsidian/workspace.json')) "Obsidian's per-device workspace file isn't tracked"
+Check ((Test-Path -LiteralPath (Join-Path $old 'AGENTS.md')) -and (Test-Path -LiteralPath (Join-Path $old '_system\ADOPT.md'))) "missing Reality OS files were added"
+$prop = Join-Path $old '_proposals\claude\CLAUDE.reality-os.md'
+Check ((Test-Path -LiteralPath $prop) -and ([IO.File]::ReadAllText($prop) -match 'Be brief') -and ([IO.File]::ReadAllText($prop) -match '(?m)^@AGENTS\.md')) "the owner's CLAUDE.md is left alone and a merged version is proposed"
+$vj = [IO.File]::ReadAllText((Join-Path $old '_system\vault.json')) | ConvertFrom-Json
+Check ($vj.mode -eq 'adopted' -and $vj.adoption -eq 'pending' -and $vj.daily -eq 'Journal/Daily' -and $vj.templates -eq '_templates') "vault.json maps the owner's daily notes and templates"
+Check ((Run-Ps (Join-Path $old '_system\Test-Vault.ps1') @('-Path', $old)) -eq 0) "Test-Vault.ps1 passes an adopted vault before the AI-run part (warnings only)"
+
+$count = "$(& git -C $old rev-list --count HEAD 2>$null)".Trim()
+$code = Run-Ps $adoptScript @('-Path', $old)
+Check ($code -eq 0 -and "$(& git -C $old rev-list --count HEAD 2>$null)".Trim() -eq $count) "running Adopt-Vault.ps1 again changes nothing"
+
+$note = Join-Path $old 'Ideas.md'
+[IO.File]::AppendAllText($note, "- two`n", $enc)
+(Get-Item -LiteralPath $note).LastWriteTime = (Get-Date).AddMinutes(-30)
+[void](Run-Ps (Join-Path $old '_system\Backup-Vault.ps1') @('-Path', $old))
+Check ("$(& git -C $old log -1 --format=%s 2>$null)".Trim() -eq 'auto: snapshot' -and (Test-Path -LiteralPath (Join-Path $absGit 'realityos-backup.json'))) "the backup works with the history outside the vault"
+
+$vj.adoption = 'done'
+[IO.File]::WriteAllText((Join-Path $old '_system\vault.json'), ($vj | ConvertTo-Json -Depth 4), $enc)
+Check ((Run-Ps (Join-Path $old '_system\Test-Vault.ps1') @('-Path', $old)) -ne 0) "once adoption is marked done, Test-Vault requires the merged rules"
+
+$leaky = Join-Path $work 'Leaky Vault'
+New-Item -ItemType Directory -Force -Path $leaky | Out-Null
+[IO.File]::WriteAllText((Join-Path $leaky 'Setup notes.md'), "# Setup`nkey: sk-ant-" + ('b' * 40) + "`n", $enc)
+$code = Run-Ps $adoptScript @('-Path', $leaky, '-Name', 'CI User', '-Email', 'ci@example.invalid')
+Check ($code -eq 2 -and -not (Test-Path -LiteralPath (Join-Path $leaky '.git')) -and @(Get-ChildItem -LiteralPath $leaky -Force).Count -eq 1) "Adopt-Vault.ps1 refuses a vault holding a key and changes nothing"
+$env:OneDrive = $realOneDrive
+
+$plain = Join-Path $work 'Plain Vault'
+New-Item -ItemType Directory -Force -Path $plain | Out-Null
+[IO.File]::WriteAllText((Join-Path $plain 'Home.md'), "# My home`n", $enc)
+$env:APPDATA = Join-Path $work 'appdata2'
+$env:REALITYOS_NO_AUTORUN = '1'
+. (Join-Path $kit 'install.ps1')
+$r = @(Install-RealityOS -SkipApps -NoBackupTask -LocalKit (Split-Path -Parent $kit) -Adopt $plain -Name 'CI User' -Email 'ci@example.invalid')
+Check ($r[-1] -eq $true -and (Test-Path -LiteralPath (Join-Path $plain '_system\ADOPT.md'))) "install.ps1 -Adopt adopts an existing vault"
+Check (Test-Path -LiteralPath (Join-Path $plain '.git') -PathType Container) "a vault outside OneDrive keeps a normal .git folder"
+$env:APPDATA = $realAppData
+Remove-Item Env:\REALITYOS_NO_AUTORUN
+
 Write-Host ""
 Write-Host "$failed check(s) failed."
 exit $failed

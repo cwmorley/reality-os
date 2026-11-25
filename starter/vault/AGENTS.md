@@ -28,6 +28,8 @@ Follow `_system/Corrections.md`. Do not turn a correction into a rule yourself.
 
 ## Where things go
 
+The main notes and folders are also listed in `_system/vault.json`, which the check and backup scripts read.
+
 | What | Where |
 |---|---|
 | Anything I want captured and haven't sorted | `Inbox.md` |
@@ -40,6 +42,10 @@ Follow `_system/Corrections.md`. Do not turn a correction into a rule yourself.
 | How I write | `Voice.md` |
 | Everything else | `Notes/` |
 | Your drafts, reviews and scratch work | `_proposals/claude/` or `_proposals/chatgpt/` (no approval needed) |
+
+## House style
+
+Every new note starts with frontmatter between `---` lines: `type` (daily, project, decision, meeting, person, review or note), `created` (YYYY-MM-DD) and, where the template has them, `status` and `updated`. Use the template for the note's type. When you change a note that has an `updated` field, set it to today. Don't add or reformat frontmatter on notes you weren't asked to change.
 
 ## Working habits
 

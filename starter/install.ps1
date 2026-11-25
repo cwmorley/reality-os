@@ -12,6 +12,9 @@
   Run it by pasting this into PowerShell:
     irm https://raw.githubusercontent.com/cwmorley/reality-os/main/starter/install.ps1 | iex
 
+  To add Reality OS to a vault you already have (alpha), set the folder first:
+    $env:REALITYOS_ADOPT = "C:\Users\you\Documents\My Vault"; irm https://raw.githubusercontent.com/cwmorley/reality-os/main/starter/install.ps1 | iex
+
   Read it first if you like:
     https://github.com/cwmorley/reality-os/blob/main/starter/install.ps1
 #>
@@ -73,6 +76,7 @@ function Install-RealityOS {
         [switch]$SkipApps,
         [switch]$NoChatGPT,
         [switch]$NoBackupTask,
+        [string]$Adopt = $env:REALITYOS_ADOPT,
         [string]$Name,
         [string]$Email
     )
@@ -132,6 +136,16 @@ function Install-RealityOS {
     if (-not (Test-Path -LiteralPath $newVault)) { Write-Bad "the kit at $kit is incomplete (no starter\tools\New-Vault.ps1)."; return $false }
 
     # 3. Vault
+    if ($Adopt) {
+        Write-Step "Adopting your existing vault (alpha)"
+        $VaultPath = (Resolve-Path -LiteralPath $Adopt -ErrorAction SilentlyContinue).ProviderPath
+        if (-not $VaultPath) { Write-Bad "$Adopt doesn't exist."; return $false }
+        $adoptArgs = @('-Path', $VaultPath)
+        if ($Name) { $adoptArgs += @('-Name', $Name) }
+        if ($Email) { $adoptArgs += @('-Email', $Email) }
+        & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $kit 'starter\tools\Adopt-Vault.ps1') @adoptArgs | Out-Host
+        if ($LASTEXITCODE -ne 0) { Write-Bad "the vault wasn't adopted; see the messages above. Nothing in your notes was changed."; return $false }
+    } else {
     Write-Step "Making your vault"
     if (Test-Path -LiteralPath (Join-Path $VaultPath 'AGENTS.md')) {
         Write-Ok "a vault already exists at $VaultPath; leaving it as it is"
@@ -142,6 +156,7 @@ function Install-RealityOS {
         if ($Email) { $vaultArgs += @('-Email', $Email) }
         & powershell -NoProfile -ExecutionPolicy Bypass -File $newVault @vaultArgs | Out-Host
         if ($LASTEXITCODE -ne 0) { Write-Bad "the vault wasn't created; see the messages above."; return $false }
+    }
     }
 
     # 4. Automatic backup
@@ -157,7 +172,9 @@ function Install-RealityOS {
     # 6. Next steps
     Write-Step "Done. Next:"
     Write-Host "   1. Open the Claude app, sign in, and click the Code tab. Choose Local, then Open folder..., and pick $VaultPath."
-    Write-Host "      If it asks whether you trust the folder, say yes. Then type:  Read _system/SETUP.md and follow it."
+    $first = 'Read _system/SETUP.md and follow it.'
+    if ($Adopt) { $first = 'Read _system/ADOPT.md and follow it.' }
+    Write-Host "      If it asks whether you trust the folder, say yes. Then type:  $first"
     Write-Host "   2. Afterwards, open Obsidian. Your vault is there; Home is the front page."
     if (-not $NoChatGPT) { Write-Host "   3. Open the ChatGPT app, sign in, press Ctrl+O and pick $VaultPath (the README has the first prompt)." }
     return $true
