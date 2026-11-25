@@ -47,11 +47,17 @@ if ($hits.Count -gt 0) {
 }
 
 # 1. Snapshot uncommitted changes once the vault has been quiet for a while.
-$changes = @(& git -C $Path status --porcelain 2>$null | Where-Object { $_ })
+$changes = @(& git -C $Path -c core.quotepath=off status --porcelain --untracked-files=all 2>$null | Where-Object { $_ })
 if ($changes.Count -gt 0) {
     $cutoff = (Get-Date).AddMinutes(-$QuietMinutes)
-    $recent = @(Get-ChildItem -LiteralPath $Path -Recurse -File -Force -ErrorAction SilentlyContinue |
-        Where-Object { $_.FullName -notlike (Join-Path $Path '.git\*') -and $_.FullName -notlike (Join-Path $Path '.obsidian\*') -and $_.LastWriteTime -gt $cutoff })
+    $recent = @()
+    foreach ($line in $changes) {
+        $rel = $line.Substring(3)
+        if ($rel -like '* -> *') { $rel = $rel.Split(@(' -> '), [StringSplitOptions]::None)[-1] }
+        $rel = $rel.Trim('"')
+        $file = Join-Path $Path ($rel -replace '/', '\')
+        if ((Test-Path -LiteralPath $file -PathType Leaf) -and (Get-Item -LiteralPath $file -Force).LastWriteTime -gt $cutoff) { $recent += $rel }
+    }
     if ($recent.Count -eq 0) {
         & git -C $Path add -A 2>$null
         & git -C $Path commit -q -m "auto: snapshot" 2>$null
