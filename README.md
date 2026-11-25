@@ -1,6 +1,6 @@
 # Reality OS
 
-**An Obsidian vault that Claude and ChatGPT share, under rules you control.** Your notes stay on your computer. Both apps read the same files about your work, show you every change before they make it, and turn your corrections into rules. Git keeps the history, and an hourly backup can copy the vault to your own private GitHub repository.
+**A shared memory and rulebook for Claude and ChatGPT, kept in an Obsidian vault on your own computer.** Both apps read your work, follow your rules, write in your voice and learn from your corrections. They show you every change before they make it, Git keeps the full history, and an hourly backup can copy the vault to your own private GitHub repository. It's built on an open protocol for multiple AIs working safely on the same notes, described [below](#the-protocol-behind-it).
 
 ## Start here
 
