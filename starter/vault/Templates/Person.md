@@ -1,3 +1,9 @@
+---
+type: person
+created: {{date}}
+updated: {{date}}
+---
+
 # {{title}}
 
 Work contact only.

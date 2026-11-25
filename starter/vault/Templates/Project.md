@@ -1,7 +1,11 @@
-# {{title}}
+---
+type: project
+status: active
+created: {{date}}
+updated: {{date}}
+---
 
-Status: active
-Started: {{date}}
+# {{title}}
 
 ## Outcome
 

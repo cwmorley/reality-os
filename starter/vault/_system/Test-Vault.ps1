@@ -23,17 +23,35 @@ $Path = (Resolve-Path -LiteralPath $Path).ProviderPath
 Write-Host "Checking vault: $Path"
 Write-Host ""
 
-# 1. Files and folders
-$files = @('AGENTS.md', 'CLAUDE.md', 'Home.md', 'Inbox.md', 'Open Loops.md', 'About.md', 'Prompts.md',
-           '.gitattributes', '.gitignore', '_system\Corrections.md', '_system\SETUP.md', '.claude\settings.json', '_system\Backup-Vault.ps1', '_system\Enable-Backup.ps1', 'Voice.md', '.claude\skills\my-voice\SKILL.md',
-           'Templates\Daily.md', 'Templates\Project.md', 'Templates\Decision.md',
-           'Templates\Meeting.md', 'Templates\Person.md', 'Templates\Weekly Review.md')
-$dirs = @('Daily', 'Projects', 'Decisions', 'Meetings', 'People', 'Notes', 'Templates',
-          '_proposals\claude', '_proposals\chatgpt')
+# 1. Files and folders. Where the main notes live comes from _system\vault.json
+#    (a starter vault ships one; an adopted vault gets one mapped to its own notes).
+$map = $null
+$mapPath = Join-Path $Path '_system\vault.json'
+if (Test-Path -LiteralPath $mapPath) {
+    try { $map = [IO.File]::ReadAllText($mapPath) | ConvertFrom-Json } catch { Fail "_system\vault.json isn't valid JSON. Restore it from the kit or fix the last edit." }
+}
+if (-not $map) {
+    $map = New-Object PSObject -Property @{ mode = 'starter'; home = 'Home.md'; inbox = 'Inbox.md'; openLoops = 'Open Loops.md'; about = 'About.md'; voice = 'Voice.md'; prompts = 'Prompts.md'; daily = 'Daily'; templates = 'Templates'; folders = @('Projects', 'Decisions', 'Meetings', 'People', 'Notes') }
+}
+$adopted = ($map.mode -eq 'adopted')
+$files = @('AGENTS.md', 'CLAUDE.md', '.gitattributes', '.gitignore', '.claude\settings.json', '.claude\skills\my-voice\SKILL.md',
+           '_system\Corrections.md', '_system\Backup-Vault.ps1', '_system\Enable-Backup.ps1', '_system\Show-Usage.ps1')
+if ($adopted) { $files += '_system\ADOPT.md' } else { $files += '_system\SETUP.md' }
+foreach ($key in @('home', 'inbox', 'openLoops', 'about', 'voice', 'prompts')) {
+    $v = $map.$key
+    if ($v) { $files += ($v -replace '/', '\') }
+}
+$dirs = @('_proposals\claude', '_proposals\chatgpt')
+foreach ($key in @('daily', 'templates')) { if ($map.$key) { $dirs += ($map.$key -replace '/', '\') } }
+foreach ($f in @($map.folders)) { if ($f) { $dirs += ($f -replace '/', '\') } }
+if (-not $adopted) {
+    foreach ($tpl in @('Daily', 'Project', 'Decision', 'Meeting', 'Person', 'Weekly Review')) { $files += "Templates\$tpl.md" }
+}
 $missing = @()
 foreach ($f in $files) { if (-not (Test-Path -LiteralPath (Join-Path $Path $f) -PathType Leaf)) { $missing += $f } }
 foreach ($d in $dirs) { if (-not (Test-Path -LiteralPath (Join-Path $Path $d) -PathType Container)) { $missing += "$d\" } }
-if ($missing.Count -eq 0) { Pass "all starter files and folders are present" }
+if ($missing.Count -eq 0) { Pass "all expected files and folders are present" }
+elseif ($adopted) { Fail ("missing: " + ($missing -join ', ') + ". Check the names in _system\vault.json, or run the kit's Adopt-Vault.ps1 again.") }
 else { Fail ("missing: " + ($missing -join ', ') + ". Copy them back from the kit's starter\vault folder.") }
 
 # 2. AGENTS.md rules
@@ -49,6 +67,7 @@ if (Test-Path -LiteralPath $agentsPath) {
         if ($section -eq 'Standing rules' -and $l -match '^-\s+\*\*R-\d+\*\*') { $standing++ }
     }
     if ($starter -eq 5) { Pass "AGENTS.md has the 5 starter rules" }
+    elseif ($adopted -and $map.adoption -ne 'done') { Warn "AGENTS.md doesn't have the 5 starter rules yet; adoption merges them in (see _system/ADOPT.md)." }
     else { Fail "AGENTS.md has $starter starter rules; it should have exactly 5. Restore them from the kit." }
     if ($standing -le 10) { Pass "AGENTS.md has $standing of at most 10 standing rules" }
     else { Fail "AGENTS.md has $standing standing rules; the limit is 10. Retire some in the weekly review." }
@@ -58,6 +77,8 @@ if (Test-Path -LiteralPath $agentsPath) {
 $claudePath = Join-Path $Path 'CLAUDE.md'
 if ((Test-Path -LiteralPath $claudePath) -and (([IO.File]::ReadAllText($claudePath)) -match '(?m)^@AGENTS\.md\s*$')) {
     Pass "CLAUDE.md points Claude at AGENTS.md"
+} elseif ($adopted -and $map.adoption -ne 'done') {
+    Warn "CLAUDE.md doesn't point at AGENTS.md yet; adoption adds that line (see _system/ADOPT.md)."
 } else {
     Fail "CLAUDE.md must contain the line @AGENTS.md so Claude reads the same rules as ChatGPT."
 }
@@ -102,16 +123,20 @@ try {
     if (Test-Path -LiteralPath $probe) { Remove-Item -LiteralPath $probe -Force -ErrorAction SilentlyContinue }
 }
 
-# 6. Not inside a synced folder
+# 6. History not inside a synced folder (an adopted vault may live in OneDrive
+#    as long as its Git history is kept outside it)
+$gitDir = "$(& git -C $Path rev-parse --absolute-git-dir 2>$null)".Trim()
+if (-not $gitDir) { $gitDir = Join-Path $Path '.git' }
+$gitDir = $gitDir -replace '/', '\'
 $synced = $false
 foreach ($root in @($env:OneDrive, $env:OneDriveConsumer, $env:OneDriveCommercial)) {
-    if ($root -and $Path.StartsWith($root, [StringComparison]::OrdinalIgnoreCase)) { $synced = $true }
+    if ($root -and $gitDir.StartsWith($root, [StringComparison]::OrdinalIgnoreCase)) { $synced = $true }
 }
-if ($synced) { Warn "the vault is inside OneDrive. Sync can create conflict copies; a folder like C:\Users\<you>\Vault is safer." }
-else { Pass "the vault is not inside OneDrive" }
+if ($synced) { Warn "the vault's Git history is inside OneDrive. Sync can corrupt it; a folder like C:\Users\<you>\Vault is safer (or adopt the vault with Adopt-Vault.ps1, which keeps the history outside OneDrive)." }
+else { Pass "the vault's history is not inside OneDrive" }
 
 # 7. Backup
-$backupFile = Join-Path $Path '.git\realityos-backup.json'
+$backupFile = Join-Path $gitDir 'realityos-backup.json'
 if (Test-Path -LiteralPath $backupFile) {
     $b = $null
     try { $b = [IO.File]::ReadAllText($backupFile) | ConvertFrom-Json } catch { }
@@ -123,12 +148,17 @@ if (Test-Path -LiteralPath $backupFile) {
     Warn "automatic backup hasn't run yet. To turn it on: powershell -NoProfile -ExecutionPolicy Bypass -File _system\Enable-Backup.ps1"
 }
 
-# 8. Setup finished
-$homePath = Join-Path $Path 'Home.md'
-if ((Test-Path -LiteralPath $homePath) -and (([IO.File]::ReadAllText($homePath)) -match 'Setup: not started')) {
-    Warn "setup is not finished yet. In the Claude Code tab, say: Read _system/SETUP.md and follow it."
+# 8. Setup or adoption finished
+if ($adopted) {
+    if ($map.adoption -ne 'done') { Warn "adoption isn't finished yet. In the Claude Code tab, say: Read _system/ADOPT.md and follow it." }
+    else { Pass "adoption has been run" }
 } else {
-    Pass "setup has been run"
+    $homePath = Join-Path $Path ($map.home -replace '/', '\')
+    if ((Test-Path -LiteralPath $homePath) -and (([IO.File]::ReadAllText($homePath)) -match 'Setup: not started')) {
+        Warn "setup is not finished yet. In the Claude Code tab, say: Read _system/SETUP.md and follow it."
+    } else {
+        Pass "setup has been run"
+    }
 }
 
 Write-Host ""

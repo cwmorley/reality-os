@@ -2,7 +2,7 @@
 
 A starter vault for one person on Windows: a folder of plain Markdown notes that Claude and ChatGPT both work in, under the same five rules. Obsidian is how you read it. Git keeps a history of every change to your notes, so any change can be undone, and an hourly backup saves the vault and can copy it to a private GitHub repository. Git can't undo things that leave your computer, such as a sent email, which is why rule 4 has the AI ask every time.
 
-What it's designed to do (these are what it's being tested on; see rows S1 to S7 in [VALIDATION.md](../VALIDATION.md)):
+What it's designed to do (these are what it's being tested on; see rows S1 to S7, and A1 and A2 for adopting, in [VALIDATION.md](../VALIDATION.md)):
 
 - Both apps start every session from the same files about your work, projects and rules.
 - Neither app changes your notes without showing you the change first, apart from four small logging edits listed in rule 2.
@@ -72,6 +72,15 @@ If it describes your work correctly, both apps are reading the same memory. Chat
 
 Ask either app for one thing you actually need today. If it gets something wrong, say what you wanted instead and "log this as a correction." That's how the vault learns your rules.
 
+## Starting a session
+
+Both apps follow the vault's rules only in sessions started *from the vault folder*:
+
+- **Claude:** in the Code tab, choose the vault folder when you start a session; it's in the recent-folders list after the first time. A regular Claude chat, or Cowork, doesn't read the vault.
+- **ChatGPT:** keep the vault open as a project in the sidebar (Ctrl+O once), and start new chats inside it. A plain ChatGPT chat doesn't read the vault.
+
+The **Start my day** prompt also tells the app to read `AGENTS.md`, so a session started from the vault always has the rules.
+
 ## Every day after that
 
 The prompts are in `Prompts.md` in your vault. These do most of the work:
@@ -98,6 +107,25 @@ Your vault already saves itself every hour on your computer. A scheduled task co
 **Why GitHub and not OneDrive:** the vault's history lives in a hidden `.git` folder, and sync apps like OneDrive can corrupt it mid-sync. GitHub stores that history properly.
 
 The backup never saves or pushes anything that looks like a password or API key. If it finds one in a note, it stops, and `Test-Vault.ps1` tells you which note. Keep keys in the app or service they belong to, never in notes. To turn the backup off, run `Enable-Backup.ps1 -Disable`.
+
+## Already have a vault? (alpha)
+
+If you already keep notes in Obsidian, whether handwritten or AI-made, Reality OS can be added to that vault instead of a new one. It doesn't move, rename or rewrite your notes, and it learns your format rather than imposing its own. Run the installer with the folder set first:
+
+```powershell
+$env:REALITYOS_ADOPT = "C:\Users\<you>\Documents\My Vault"; irm https://raw.githubusercontent.com/cwmorley/reality-os/main/starter/install.ps1 | iex
+```
+
+Or, with the kit already downloaded: `powershell -NoProfile -ExecutionPolicy Bypass -File "$HOME\RealityOS-kit\starter\tools\Adopt-Vault.ps1" -Path "<your vault>"`.
+
+What it does:
+
+1. Stops before changing anything if a note contains something that looks like a password or API key.
+2. Saves a snapshot commit, `adopt: before Reality OS`, so all of it can be undone. If the vault has no Git yet and lives in OneDrive, Git's history is kept outside OneDrive.
+3. Adds only the Reality OS files that are missing. If you already have an `AGENTS.md`, `CLAUDE.md` or `.claude/settings.json`, yours are left alone, and the Reality OS version goes into `_proposals/claude/` to merge with you.
+4. Then, in the Code tab, type `Read _system/ADOPT.md and follow it.` Claude surveys how your vault is organized, reading only frontmatter and the first lines of a sample of notes and asking before it looks in personal folders. It agrees with you which of your notes are the front page, inbox, open loops and about-me, and writes your note format into the rules as your house style. New notes follow that style. Old notes change only if you ask, with the **Tidy a folder** prompt, a batch at a time.
+
+This is alpha: it's tested by CI on sample vaults, not yet on a real one.
 
 ## What's in your vault
 

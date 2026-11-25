@@ -1,0 +1,13 @@
+{
+  "mode": "starter",
+  "adoption": "not-applicable",
+  "home": "Home.md",
+  "inbox": "Inbox.md",
+  "openLoops": "Open Loops.md",
+  "about": "About.md",
+  "voice": "Voice.md",
+  "prompts": "Prompts.md",
+  "daily": "Daily",
+  "templates": "Templates",
+  "folders": ["Projects", "Decisions", "Meetings", "People", "Notes"]
+}

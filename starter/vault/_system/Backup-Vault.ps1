@@ -8,7 +8,7 @@
   2. If the vault has a backup remote named "origin", pushes to it. It never
      asks for a password: if GitHub needs you to sign in again, it records the
      failure and Test-Vault.ps1 warns you.
-  The result is written to .git\realityos-backup.json (not part of your notes).
+  The result is written to realityos-backup.json in the Git folder (not part of your notes).
 .EXAMPLE
   powershell -NoProfile -ExecutionPolicy Bypass -File _system\Backup-Vault.ps1
 #>
@@ -22,7 +22,9 @@ $env:GCM_INTERACTIVE = 'never'
 
 $status = [ordered]@{ ran = (Get-Date).ToString('o'); committed = $false; pushed = $false; remote = $false; message = '' }
 function Save-Status {
-    $file = Join-Path $Path '.git\realityos-backup.json'
+    $gitDir = "$(& git -C $Path rev-parse --absolute-git-dir 2>$null)".Trim() -replace '/', '\'
+    if (-not $gitDir) { $gitDir = Join-Path $Path '.git' }
+    $file = Join-Path $gitDir 'realityos-backup.json'
     $previous = $null
     if (Test-Path -LiteralPath $file) { try { $previous = [IO.File]::ReadAllText($file) | ConvertFrom-Json } catch { } }
     if ($status.pushed) { $status['lastPush'] = $status.ran }

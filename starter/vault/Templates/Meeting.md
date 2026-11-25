@@ -1,6 +1,10 @@
+---
+type: meeting
+created: {{date}}
+---
+
 # {{title}}
 
-Date: {{date}}
 With:
 
 ## Notes

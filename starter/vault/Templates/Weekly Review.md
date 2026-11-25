@@ -1,3 +1,8 @@
+---
+type: review
+created: {{date}}
+---
+
 # Weekly review {{date}}
 
 ## Usage

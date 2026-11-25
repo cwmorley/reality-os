@@ -1,7 +1,10 @@
-# {{title}}
+---
+type: decision
+status: decided
+created: {{date}}
+---
 
-Date: {{date}}
-Status: decided
+# {{title}}
 
 ## Decision
 
