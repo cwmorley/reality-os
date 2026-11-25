@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git show:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File _system/Test-Vault.ps1:*)",
+      "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File _system/Show-Usage.ps1:*)"
+    ]
+  }
+}

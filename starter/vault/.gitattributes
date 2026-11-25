@@ -1,0 +1,3 @@
+# Line endings: let Git normalize text; PowerShell scripts stay CRLF on Windows.
+* text=auto
+*.ps1 text eol=crlf

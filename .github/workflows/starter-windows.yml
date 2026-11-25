@@ -1,0 +1,19 @@
+name: starter kit on Windows
+on:
+  pull_request:
+    paths: ['starter/**', '.github/workflows/starter-windows.yml']
+  push:
+    branches: [main]
+    paths: ['starter/**', '.github/workflows/starter-windows.yml']
+permissions:
+  contents: read
+jobs:
+  windows-powershell-5:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build a vault and test it with Windows PowerShell 5.1
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File starter\tests\Test-Starter.ps1
