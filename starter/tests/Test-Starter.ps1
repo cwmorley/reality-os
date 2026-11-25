@@ -46,6 +46,11 @@ Check $settingsOk "Claude project settings were copied, parse, and cover both Ba
 $tracked = @(& git -C $vault ls-files 2>$null)
 Check ($tracked -contains '.claude/settings.json') "Claude project settings are committed"
 Check ($tracked -contains '.obsidian/templates.json') "shipped Obsidian settings are committed"
+$skill = Join-Path $vault '.claude\skills\my-voice\SKILL.md'
+$skillText = ''
+if (Test-Path -LiteralPath $skill) { $skillText = [IO.File]::ReadAllText($skill) }
+Check ($skillText.StartsWith('---') -and $skillText -match '(?m)^description: .+' -and $skillText -match 'Voice\.md') "the my-voice skill has frontmatter and points at Voice.md"
+Check ($tracked -contains '.claude/skills/my-voice/SKILL.md' -and $tracked -contains 'Voice.md') "the voice skill and note are committed"
 $count = "$(& git -C $vault rev-list --count HEAD 2>$null)".Trim()
 Check ($count -eq '1') "the vault has its first commit ($count)"
 $branch = "$(& git -C $vault rev-parse --abbrev-ref HEAD 2>$null)".Trim()

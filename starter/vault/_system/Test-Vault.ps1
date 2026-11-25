@@ -25,7 +25,7 @@ Write-Host ""
 
 # 1. Files and folders
 $files = @('AGENTS.md', 'CLAUDE.md', 'Home.md', 'Inbox.md', 'Open Loops.md', 'About.md', 'Prompts.md',
-           '.gitattributes', '.gitignore', '_system\Corrections.md', '_system\SETUP.md', '.claude\settings.json', '_system\Backup-Vault.ps1', '_system\Enable-Backup.ps1',
+           '.gitattributes', '.gitignore', '_system\Corrections.md', '_system\SETUP.md', '.claude\settings.json', '_system\Backup-Vault.ps1', '_system\Enable-Backup.ps1', 'Voice.md', '.claude\skills\my-voice\SKILL.md',
            'Templates\Daily.md', 'Templates\Project.md', 'Templates\Decision.md',
            'Templates\Meeting.md', 'Templates\Person.md', 'Templates\Weekly Review.md')
 $dirs = @('Daily', 'Projects', 'Decisions', 'Meetings', 'People', 'Notes', 'Templates',

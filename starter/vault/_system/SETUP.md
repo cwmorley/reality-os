@@ -64,3 +64,5 @@ Tell them:
 1. Open Obsidian. The vault is already listed if they used the installer; otherwise choose **Open folder as vault** and pick this folder. `Home.md` is the front page.
 2. Open the ChatGPT desktop app, open this same folder (Ctrl+O), choose **Ask for approval**, and paste: "Read AGENTS.md. In five bullets, tell me what you know about me and my work. Then suggest one improvement to my top project." If ChatGPT describes their work correctly, both apps now share the same memory.
 3. Tomorrow, start with the **Start my day** prompt in `Prompts.md`, and end with **Wrap up**.
+4. The first time they want something drafted as themselves, use **Learn my voice** in `Prompts.md`.
+5. In the first week, connect the cloud backup (the README's "Back it up to the cloud").

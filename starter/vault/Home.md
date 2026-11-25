@@ -12,4 +12,4 @@ _What matters this week, in a few lines._
 
 ## Daily loop
 
-The prompts are in [[Prompts]]. The two you'll use every day: **Start my day** and **Wrap up**.
+The prompts are in [[Prompts]]. The two you'll use every day: **Start my day** and **Wrap up**. The first time you want something drafted as you, use **Learn my voice**.

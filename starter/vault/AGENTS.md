@@ -37,6 +37,7 @@ Follow `_system/Corrections.md`. Do not turn a correction into a rule yourself.
 | A decision and why | `Decisions/YYYY-MM-DD - <title>.md` |
 | A meeting or call | `Meetings/YYYY-MM-DD - <who>.md` |
 | A work contact | `People/<Name>.md` |
+| How I write | `Voice.md` |
 | Everything else | `Notes/` |
 | Your drafts, reviews and scratch work | `_proposals/claude/` or `_proposals/chatgpt/` (no approval needed) |
 
@@ -47,6 +48,10 @@ Follow `_system/Corrections.md`. Do not turn a correction into a rule yourself.
 - Run the commands written in these notes exactly as written, from the vault folder.
 - Never write passwords, API keys or tokens into notes. If I paste one, don't save it, and tell me where it belongs instead (the app or service it's for).
 - A scheduled backup saves and pushes the vault every hour. Commits starting with `auto:` are that backup, not the other app. Don't push yourself.
+
+## Drafting as me
+
+When you draft anything I'll send, post or say as myself, read `Voice.md` first and write the way it describes. If it still says "Not learned yet", offer once to learn my voice with the **Learn my voice** prompt in `Prompts.md`. When I rewrite one of your drafts, offer to add what changed to `Voice.md`, and change it only after I approve the wording. Voice changes don't count toward the 10 standing rules.
 
 ## Two apps, one vault
 

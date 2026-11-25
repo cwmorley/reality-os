@@ -18,6 +18,10 @@ Then later:
 
 > Wrap up. Add to today's Daily note what changed today, move anything unfinished into Open Loops.md, and update the Next step on any project that moved. Then commit.
 
+## Learn my voice
+
+> Learn my voice. I'll paste 3 to 5 things I wrote myself, without AI: emails, messages or posts. Ask me for them one at a time. Then fill in Voice.md from them: how I write, words and phrases I use, things I never do, and how my tone changes by audience. Show me the result before you save it. Don't save the samples themselves.
+
 ## Second opinion
 
 Use this in the *other* app from the one that did the work, once you use two apps:
