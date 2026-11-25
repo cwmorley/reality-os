@@ -25,7 +25,7 @@ Write-Host ""
 
 # 1. Files and folders
 $files = @('AGENTS.md', 'CLAUDE.md', 'Home.md', 'Inbox.md', 'Open Loops.md', 'About.md', 'Prompts.md',
-           '.gitattributes', '.gitignore', '_system\Corrections.md', '_system\SETUP.md', '.claude\settings.json',
+           '.gitattributes', '.gitignore', '_system\Corrections.md', '_system\SETUP.md', '.claude\settings.json', '_system\Backup-Vault.ps1', '_system\Enable-Backup.ps1',
            'Templates\Daily.md', 'Templates\Project.md', 'Templates\Decision.md',
            'Templates\Meeting.md', 'Templates\Person.md', 'Templates\Weekly Review.md')
 $dirs = @('Daily', 'Projects', 'Decisions', 'Meetings', 'People', 'Notes', 'Templates',
@@ -110,7 +110,20 @@ foreach ($root in @($env:OneDrive, $env:OneDriveConsumer, $env:OneDriveCommercia
 if ($synced) { Warn "the vault is inside OneDrive. Sync can create conflict copies; a folder like C:\Users\<you>\Vault is safer." }
 else { Pass "the vault is not inside OneDrive" }
 
-# 7. Setup finished
+# 7. Backup
+$backupFile = Join-Path $Path '.git\realityos-backup.json'
+if (Test-Path -LiteralPath $backupFile) {
+    $b = $null
+    try { $b = [IO.File]::ReadAllText($backupFile) | ConvertFrom-Json } catch { }
+    if ($b -and $b.secret) { Fail "the backup stopped: something that looks like a key or password is in $($b.secret). Remove it from the note." }
+    elseif ($b -and $b.remote -and -not $b.pushed) {
+        Warn "the last cloud backup didn't go through: $($b.message) If GitHub wants you to sign in again, run: git -C `"$Path`" push"
+    } elseif ($b) { Pass "automatic backup ran at $($b.ran)" }
+} else {
+    Warn "automatic backup hasn't run yet. To turn it on: powershell -NoProfile -ExecutionPolicy Bypass -File _system\Enable-Backup.ps1"
+}
+
+# 8. Setup finished
 $homePath = Join-Path $Path 'Home.md'
 if ((Test-Path -LiteralPath $homePath) -and (([IO.File]::ReadAllText($homePath)) -match 'Setup: not started')) {
     Warn "setup is not finished yet. In the Claude Code tab, say: Read _system/SETUP.md and follow it."

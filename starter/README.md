@@ -27,7 +27,7 @@ Open PowerShell (Start menu, type PowerShell) and paste this one line:
 irm https://raw.githubusercontent.com/cwmorley/reality-os/main/starter/install.ps1 | iex
 ```
 
-It installs Git, Obsidian, the Claude desktop app and the ChatGPT desktop app (skipping any you already have), downloads the kit to `C:\Users\<you>\RealityOS-kit`, makes your vault at `C:\Users\<you>\Vault` (outside OneDrive), and adds the vault to Obsidian. Windows may ask once or twice whether to let an installer make changes; say yes. If Git hasn't been told your name and email yet, it asks once; they stay on your computer.
+It installs Git, Obsidian, the Claude desktop app and the ChatGPT desktop app (skipping any you already have), downloads the kit to `C:\Users\<you>\RealityOS-kit`, makes your vault at `C:\Users\<you>\Vault` (outside OneDrive), turns on an hourly automatic backup, and adds the vault to Obsidian. Windows may ask once or twice whether to let an installer make changes; say yes. If Git hasn't been told your name and email yet, it asks once; they stay on your computer.
 
 It ends with a checklist. Every line should say PASS, except one WARN saying setup isn't finished yet. That's expected. You can [read the installer](./install.ps1) before running it, and running it again is safe: it never overwrites your vault.
 
@@ -60,7 +60,24 @@ If it describes your work correctly, both apps read the same memory. ChatGPT sho
 
 Ask either app for one thing you actually need today. If it gets something wrong, say what you wanted instead and "log this as a correction." That's how the vault learns your rules.
 
-### Installing by hand
+## Back it up to the cloud (do this in your first week)
+
+The vault already saves itself every hour on your computer: a scheduled task commits anything left unsaved (including edits you make yourself in Obsidian) as `auto: snapshot`. To also keep a copy in the cloud, so it survives a dead laptop and Claude on the web or your phone can open it:
+
+1. On github.com (free account), create a new **private**, empty repository, for example `my-vault`. Don't add a README.
+2. In PowerShell, paste, with your repository's address:
+
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File "$HOME\Vault\_system\Enable-Backup.ps1" -Remote https://github.com/<you>/my-vault.git
+   ```
+
+   A GitHub sign-in opens in your browser once. After that the hourly backup also pushes to GitHub, with no prompts.
+
+Why GitHub and not OneDrive: the vault's history lives in a hidden `.git` folder, and sync apps like OneDrive can corrupt it mid-sync. GitHub stores that history properly. If you use a work computer, check you're allowed to keep work notes in a private GitHub repository first.
+
+The backup never pushes anything that looks like a password or API key; if it finds one in a note, it stops and `Test-Vault.ps1` tells you which note. Keep keys in the app or service they belong to, never in notes. To turn the backup off: `Enable-Backup.ps1 -Disable`.
+
+## Installing by hand
 
 1. Install the Claude desktop app (claude.com/download), the ChatGPT desktop app (Microsoft Store) and Obsidian (obsidian.md).
 2. In PowerShell: `winget install --id Git.Git -e --source winget --accept-source-agreements --accept-package-agreements`, then close PowerShell. Restart the Claude or ChatGPT app if it was open, so it finds Git.
@@ -71,7 +88,8 @@ Ask either app for one thing you actually need today. If it gets something wrong
    powershell -NoProfile -ExecutionPolicy Bypass -File "$HOME\RealityOS-kit\starter\tools\New-Vault.ps1"
    ```
 
-4. In Obsidian, choose **Open folder as vault** and pick `C:\Users\<you>\Vault`. Then carry on from step 2 above.
+4. Turn on the automatic backup: `powershell -NoProfile -ExecutionPolicy Bypass -File "$HOME\Vault\_system\Enable-Backup.ps1"`
+5. In Obsidian, choose **Open folder as vault** and pick `C:\Users\<you>\Vault`. Then carry on from step 2 of the first hour.
 
 ## Every day after that
 
@@ -100,5 +118,6 @@ If either fails, the fix is simpler onboarding, not more features.
 ## What's not in v0.1
 
 - No extra write gate beyond each app's own approval prompt. Git is the undo.
-- No automatic commits. If the apps forget to commit, the fallback is the Obsidian Git plugin on a timer.
-- No sync, mobile, or personal-life templates.
+- No API keys. Both apps run on their own subscriptions; nothing in the kit calls an API.
+- No syncing between two computers or into a phone app. The GitHub backup is a one-way copy.
+- No personal-life templates.

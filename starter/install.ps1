@@ -5,6 +5,7 @@
   Installs Git, Obsidian, the Claude desktop app and the ChatGPT desktop app
   with winget (skipping any already installed), downloads the kit to
   C:\Users\<you>\RealityOS-kit, creates the vault at C:\Users\<you>\Vault,
+  turns on an hourly automatic backup (a scheduled task for your user),
   and adds the vault to Obsidian. Safe to run again: it never overwrites an
   existing vault and never adds the vault to Obsidian twice.
 
@@ -71,6 +72,7 @@ function Install-RealityOS {
         [string]$LocalKit,
         [switch]$SkipApps,
         [switch]$NoChatGPT,
+        [switch]$NoBackupTask,
         [string]$Name,
         [string]$Email
     )
@@ -142,11 +144,17 @@ function Install-RealityOS {
         if ($LASTEXITCODE -ne 0) { Write-Bad "the vault wasn't created; see the messages above."; return $false }
     }
 
-    # 4. Obsidian
+    # 4. Automatic backup
+    if (-not $NoBackupTask) {
+        Write-Step "Turning on automatic backup"
+        & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $VaultPath '_system\Enable-Backup.ps1') -Path $VaultPath | Out-Host
+    }
+
+    # 5. Obsidian
     Write-Step "Adding the vault to Obsidian"
     Register-ObsidianVault -VaultPath $VaultPath
 
-    # 5. Next steps
+    # 6. Next steps
     Write-Step "Done. Next:"
     Write-Host "   1. Open the Claude app, sign in, and click the Code tab. Choose Local, then Open folder..., and pick $VaultPath."
     Write-Host "      If it asks whether you trust the folder, say yes. Then type:  Read _system/SETUP.md and follow it."

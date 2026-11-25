@@ -103,7 +103,7 @@ $env:APPDATA = Join-Path $work 'appdata'
 $env:REALITYOS_NO_AUTORUN = '1'
 . (Join-Path $kit 'install.ps1')
 $vault2 = Join-Path $work 'Vault2'
-$r = @(Install-RealityOS -SkipApps -LocalKit (Split-Path -Parent $kit) -VaultPath $vault2 -Name 'CI User' -Email 'ci@example.invalid')
+$r = @(Install-RealityOS -SkipApps -NoBackupTask -LocalKit (Split-Path -Parent $kit) -VaultPath $vault2 -Name 'CI User' -Email 'ci@example.invalid')
 Check ($r[-1] -eq $true) "install.ps1 completes with apps skipped"
 Check (Test-Path -LiteralPath (Join-Path $vault2 'AGENTS.md')) "install.ps1 creates the vault"
 $obs = Join-Path $env:APPDATA 'obsidian\obsidian.json'
@@ -112,12 +112,58 @@ try { $reg = [IO.File]::ReadAllText($obs) | ConvertFrom-Json } catch { }
 $entries = @()
 if ($reg) { $entries = @($reg.vaults.PSObject.Properties | ForEach-Object { $_.Value }) }
 Check ($entries.Count -eq 1 -and $entries[0].path -eq $vault2 -and $entries[0].open -eq $true) "install.ps1 registers the vault in Obsidian and marks it open"
-$r = @(Install-RealityOS -SkipApps -LocalKit (Split-Path -Parent $kit) -VaultPath $vault2)
+$r = @(Install-RealityOS -SkipApps -NoBackupTask -LocalKit (Split-Path -Parent $kit) -VaultPath $vault2)
 $reg = [IO.File]::ReadAllText($obs) | ConvertFrom-Json
 Check ($r[-1] -eq $true -and @($reg.vaults.PSObject.Properties).Count -eq 1) "running install.ps1 again changes nothing"
 Check ("$(& git -C $vault2 rev-list --count HEAD 2>$null)".Trim() -eq '1') "the second run left the vault's history alone"
 $env:APPDATA = $realAppData
 Remove-Item Env:\REALITYOS_NO_AUTORUN
+
+# 7. Automatic backup: snapshot, push to a remote, stop on secrets, scheduled task.
+$backup = Join-Path $vault2 '_system\Backup-Vault.ps1'
+$bare = Join-Path $work 'remote.git'
+& git init -q --bare $bare
+& git -C $vault2 remote add origin $bare
+$noteFile = Join-Path $vault2 'Notes\Edited in Obsidian.md'
+[IO.File]::WriteAllText($noteFile, "typed directly in Obsidian`n", $enc)
+(Get-Item -LiteralPath $noteFile).LastWriteTime = (Get-Date).AddMinutes(-30)
+$code = Run-Ps $backup @('-Path', $vault2)
+$last = "$(& git -C $vault2 log -1 --format=%s 2>$null)".Trim()
+Check ($code -eq 0 -and $last -eq 'auto: snapshot') "Backup-Vault.ps1 snapshots quiet uncommitted edits ($last)"
+$remoteHead = "$(& git -C $bare rev-parse main 2>$null)".Trim()
+$localHead = "$(& git -C $vault2 rev-parse HEAD 2>$null)".Trim()
+Check ($remoteHead -and $remoteHead -eq $localHead) "Backup-Vault.ps1 pushes to the backup remote"
+$bj = [IO.File]::ReadAllText((Join-Path $vault2 '.git\realityos-backup.json')) | ConvertFrom-Json
+Check ($bj.pushed -eq $true -and $bj.lastPush) "Backup-Vault.ps1 records the push"
+Check ((Run-Ps (Join-Path $vault2 '_system\Test-Vault.ps1') @('-Path', $vault2)) -eq 0) "Test-Vault.ps1 passes after a backup"
+
+$fresh = Join-Path $vault2 'Notes\Typed just now.md'
+[IO.File]::WriteAllText($fresh, "still typing`n", $enc)
+[void](Run-Ps $backup @('-Path', $vault2))
+Check ("$(& git -C $vault2 status --porcelain 2>$null)".Trim() -ne '') "Backup-Vault.ps1 waits while edits are recent"
+(Get-Item -LiteralPath $fresh).LastWriteTime = (Get-Date).AddMinutes(-30)
+
+$keyFile = Join-Path $vault2 'Notes\Pasted setup.md'
+$fakeKey = 'sk-ant-' + ('a' * 40)
+[IO.File]::WriteAllText($keyFile, "my key: $fakeKey`n", $enc)
+(Get-Item -LiteralPath $keyFile).LastWriteTime = (Get-Date).AddMinutes(-30)
+$before = "$(& git -C $vault2 rev-parse HEAD 2>$null)".Trim()
+[void](Run-Ps $backup @('-Path', $vault2))
+Check ("$(& git -C $vault2 rev-parse HEAD 2>$null)".Trim() -eq $before) "Backup-Vault.ps1 refuses to save a note containing an API key"
+Check ((Run-Ps (Join-Path $vault2 '_system\Test-Vault.ps1') @('-Path', $vault2)) -ne 0) "Test-Vault.ps1 fails while a key is in a note"
+Remove-Item -LiteralPath $keyFile -Force
+[void](Run-Ps $backup @('-Path', $vault2))
+Check ("$(& git -C $vault2 log -1 --format=%s 2>$null)".Trim() -eq 'auto: snapshot') "the backup resumes once the key is removed"
+
+$usage = (& powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $vault2 '_system\Show-Usage.ps1') -Path $vault2) -join "`n"
+Check ($usage -match 'Automatic backup snapshots \(not counted as use\): 2') "Show-Usage.ps1 doesn't count backup snapshots as use"
+
+$taskName = 'RealityOS CI ' + [guid]::NewGuid().ToString('N').Substring(0, 8)
+$enable = Join-Path $vault2 '_system\Enable-Backup.ps1'
+$code = Run-Ps $enable @('-Path', $vault2, '-TaskName', $taskName)
+Check ($code -eq 0 -and (Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue)) "Enable-Backup.ps1 registers the hourly task"
+$code = Run-Ps $enable @('-Path', $vault2, '-TaskName', $taskName, '-Disable')
+Check ($code -eq 0 -and -not (Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue)) "Enable-Backup.ps1 -Disable removes it"
 
 Write-Host ""
 Write-Host "$failed check(s) failed."

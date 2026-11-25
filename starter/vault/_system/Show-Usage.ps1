@@ -26,13 +26,15 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $activeDays = @{}
+$auto = 0
 $claude = 0
 $chatgpt = 0
 $other = 0
 foreach ($entry in $log) {
     $parts = $entry.Split('|', 2)
-    $activeDays[$parts[0]] = $true
     $msg = $parts[1].Trim().ToLowerInvariant()
+    if ($msg.StartsWith('auto:')) { $auto++; continue }
+    $activeDays[$parts[0]] = $true
     if ($msg.StartsWith('claude:')) { $claude++ }
     elseif ($msg.StartsWith('chatgpt:')) { $chatgpt++ }
     else { $other++ }
@@ -41,6 +43,7 @@ foreach ($entry in $log) {
 Write-Host "Last $Days days (since $since):"
 Write-Host ("  Days with at least one change: {0} of {1}" -f $activeDays.Count, $Days)
 Write-Host ("  Changes by Claude: {0}   by ChatGPT: {1}   other: {2}" -f $claude, $chatgpt, $other)
+Write-Host ("  Automatic backup snapshots (not counted as use): {0}" -f $auto)
 if ($Days -eq 14) {
     if ($activeDays.Count -ge 10) { Write-Host "  On target (10 of 14 days)." }
     else { Write-Host "  Below the 10-of-14 target. Look at what got in the way before adding anything new." }

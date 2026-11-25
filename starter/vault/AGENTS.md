@@ -45,6 +45,8 @@ Follow `_system/Corrections.md`. Do not turn a correction into a rule yourself.
 - Get today's date by running `date +%F` (Git Bash) or `Get-Date -Format yyyy-MM-dd` (PowerShell), never from memory.
 - Edit notes with your file-edit tool, not with shell redirection.
 - Run the commands written in these notes exactly as written, from the vault folder.
+- Never write passwords, API keys or tokens into notes. If I paste one, don't save it, and tell me where it belongs instead (the app or service it's for).
+- A scheduled backup saves and pushes the vault every hour. Commits starting with `auto:` are that backup, not the other app. Don't push yourself.
 
 ## Two apps, one vault
 
