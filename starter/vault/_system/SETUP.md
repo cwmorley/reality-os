@@ -18,6 +18,14 @@ Run `date +%F` (or `Get-Date -Format yyyy-MM-dd`) and use that date everywhere b
 
 In three or four lines: you'll ask eight short questions, one at a time. Each answer becomes a few lines in a note, and they'll see and approve each change before it's written. Every change is saved in Git, so any of it can be undone.
 
+## 1b. Offer a head start (optional)
+
+Ask: "Want a head start? If you've used ChatGPT or another AI, it may already know things about your work. And if you keep work files in folders, I can look at the folder and file names (not what's inside) to suggest projects. Both are optional, and nothing is saved until you approve it."
+
+- **What another AI remembers.** Ask them to open that AI and send it: "List what you remember about my work: my role, projects, tools, the people I work with, and how I like answers. Plain bullets, nothing about health, relationships or money." Have them paste the reply into this chat, not into a file. Don't save it as it is. In step 2, for each question, show what you already have from it and ask them to confirm or fix it instead of asking from scratch. Write only what they confirm.
+- **Work folders.** Ask them to name up to three folders. List names only, two levels deep, and only after they approve the command. Suggest projects from what you see. Open a file only if they ask you to. Never copy files into the vault; link to them by path in the project note instead.
+- If they say no, or nothing useful turns up, go straight to step 2.
+
 ## 2. Ask the questions, one at a time
 
 After each question's changes, commit them with `claude: setup - <short name>` (for example `claude: setup - projects`), or `chatgpt:` if you are ChatGPT.
