@@ -32,9 +32,9 @@ The rest of this page is for people interested in the architecture: how several 
 
 **A filesystem-native governance protocol for multiple independent AI systems operating on shared durable knowledge—with no framework, database, or shared runtime.**
 
-Reality OS began as a personal operating system built in Markdown inside Obsidian. This repository documents the coordination architecture that emerged from that deployment: how independent AI products can work over one shared file store while keeping context bounded, writes governed, inference labeled, and reconciliation durable.
+Reality OS began as a personal operating system built in Markdown inside Obsidian. This repository documents the coordination architecture that emerged from that deployment: how independent AI products can coordinate around one shared file store while keeping context bounded, writes governed, inference labeled, and reconciliation durable.
 
-The protocol is a pattern, not a packaged product; the starter above is one packaged application of it. The protocol doesn't require Obsidian specifically. It requires a shared filesystem, explicit governance contracts, and cooperating AI sessions that read and follow those contracts before acting.
+The protocol is a pattern, not a packaged product; the starter above is one packaged application of it. The protocol doesn't require Obsidian specifically. It requires a shared filesystem for durable state, explicit governance contracts, and cooperating AI sessions that either access that state directly or pass bounded proposals to an authorized maintainer.
 
 The protocol's four shorthand invariants are:
 
@@ -100,7 +100,7 @@ The full status and untested failure probes are in [`VALIDATION.md`](./VALIDATIO
 
 ## Reference deployment
 
-The original deployment runs in an Obsidian vault across Claude, OpenAI's Codex, ChatGPT, and Gemini as independent collaborating sessions, with a human retaining final authority over canonical change. In that deployment, Codex currently fills the **Canonical Reconciler** role. Those product assignments are examples, not protocol requirements.
+The original deployment uses an Obsidian vault with Claude and OpenAI's Codex as file-capable collaborators. Other collaborators contribute through proposals or bounded handoffs, including a local model with read-only access and chat sessions without vault access. The **Canonical Reconciler** role is shared among the participants the human has made eligible writers, through one common commit path, and the human retains final authority over canonical change. Product participation does not imply identical access or write authority; these assignments are examples, not protocol requirements.
 
 ## Status
 

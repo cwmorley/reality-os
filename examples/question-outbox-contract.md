@@ -8,7 +8,7 @@ This genericized transport contract governs how independent AI agents propose co
 - The **Canonical Reconciler** reviews candidates, updates the canonical operational queue, and records a durable disposition for each candidate version.
 - **Human Authority** retains decision and implementation authority.
 
-In the reference deployment, Codex currently fills the Canonical Reconciler role. That assignment is an implementation example, not a protocol dependency.
+In the reference deployment, the Canonical Reconciler role is shared by every participant the human has made an eligible writer, through one common commit path. That arrangement is an implementation example, not a protocol dependency.
 
 The outbox is provisional proposal state. `Open Questions.md` is canonical operational state. The owning project, decision, or opportunity note holds durable domain truth.
 
