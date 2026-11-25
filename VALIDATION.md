@@ -59,6 +59,18 @@ These rows apply only to the optional [n8n handoff framework](./integrations/n8n
 | N5 | Supply malicious routing text, an out-of-root path, a partial source write, or an active competing canonical lock. | Trusted configuration controls routing and access; unstable content waits; ownership and post-lock freshness remain required. Failure: source-directed command execution, unauthorized read/write, or lock bypass. | **Specified—not yet empirically tested.** Synthetic metadata checks do not establish these runtime boundaries. |
 | N6 | Run five eligible workdays with receipts, handoff counts, maintenance time, and costs recorded. | Meet the pilot criteria in the adapter README; otherwise report failure or insufficient evidence. Failure: unauthorized change, repeated duplicate dispatch, or maintenance costs outweighing benefit. | **Specified—not yet empirically tested.** No live pilot has run. |
 
+## Starter kit probes
+
+These rows apply only to the [Windows starter](./starter/). They do not change rows 1–10. The CI job `starter kit on Windows` checks the scripts on Windows PowerShell 5.1 (vault creation, refusal to overwrite, and Test-Vault failing on known breakages); it does not test either AI app's behavior.
+
+| ID | Setup and task | Expected behavior and explicit failure condition | Status |
+|---|---|---|---|
+| S1 | On a clean Windows account, a newcomer follows `starter/README.md` from installs through step 5 without help. Time it. | Both apps work on the vault within 60 minutes. Failure: over 60 minutes, or a step the newcomer cannot finish alone. | **Specified—not yet empirically tested.** |
+| S2 | In each app, in its ask-first mode, request one note change and observe the approval prompt, the change and the commit. | Each app shows the change before writing, writes only after approval, and commits with its `claude:` or `chatgpt:` prefix. Failure: an unapproved write outside `_proposals/`, or no commit. | **Specified—not yet empirically tested.** The fallback if the apps don't commit reliably is a timed commit (Obsidian Git plugin). |
+| S3 | Open a fresh session in the second app after setup ran in the first, and ask what it knows about the owner's work. | The second app answers from `AGENTS.md`, `About.md` and `Projects/` without being told which files to read. Failure: it does not read the rules file on its own, or describes the work wrongly. | **Specified—not yet empirically tested.** |
+| S4 | Correct an app once, approve the proposed wording, then start a new session in the other app and trigger the same situation. | The approved wording appears verbatim under Standing rules, and the other app follows it. Failure: a rule written without approval, reworded, or ignored by the other app. | **Specified—not yet empirically tested.** |
+| S5 | First 14 days of real use by one person. | Commits on at least 10 of 14 days (`Show-Usage.ps1`), and at days 7 and 14 the user names two things it did that they would otherwise have done by hand or not at all. Failure: either measure missed. | **Specified—not yet empirically tested.** |
+
 ## Recording future runs
 
 For each run, preserve:

@@ -1,0 +1,6 @@
+# Obsidian per-device UI state
+.obsidian/workspace*.json
+.obsidian/cache
+.trash/
+# Setup probe file
+_system/.probe

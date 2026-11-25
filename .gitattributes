@@ -1,3 +1,5 @@
 # Keep the generated Code-node source reproducible across Windows and CI.
 integrations/n8n/** text eol=lf
 .github/workflows/* text eol=lf
+# The starter kit runs on Windows PowerShell 5.1; keep its scripts CRLF.
+starter/**/*.ps1 text eol=crlf
